@@ -58,16 +58,17 @@ protected:
     } staticParam;
     /** @} */
 
-protected:
+public:
     /**
      * @name port func
      * @{ */
-    virtual int searchFileCnt(const char* path, const char* regex) = 0;
-    virtual bool searchFileName(const char* path, const char* regex, std::string& out, int pos) = 0;
+    virtual int searchFileCnt(const char* path, const char* regex) const = 0;
+    virtual bool searchFileName(const char* path, const char* regex, std::string& out, int pos) const = 0;
     virtual bool readConfigFromFile(const char* filepath) = 0;
     virtual bool readColorConfigFromFile(const char* filepath) = 0;
     virtual bool readStaticParameter() = 0;
     virtual bool writeStaticParameter() = 0;
+protected:
     /** @} */
     /**
      * @name text operation
@@ -152,4 +153,11 @@ public:
      * @return bank's name
      */
     std::string getBankName() const;
+
+    /**
+     * @brief getTriggerNum
+     * @param id
+     * @return number
+     */
+    int getTriggerNum(triggerID_t id) const;
 };

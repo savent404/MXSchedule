@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 class iAudio : public iEvent {
+protected:
     const iParam* parameter;
 
 public:

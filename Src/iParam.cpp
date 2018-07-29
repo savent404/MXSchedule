@@ -188,3 +188,8 @@ string iParam::getBankName() const
 {
     return bankName;
 }
+
+int iParam::getTriggerNum(triggerID_t id) const
+{
+    return triggerNum[id];
+}
