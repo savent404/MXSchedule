@@ -22,6 +22,9 @@
 #define EVENT_MODULE_ID_PARAM (1 << 4)
 #endif
 
+extern void defaultEventSender(uint32_t message);
+extern bool defaultEventReciver(uint32_t& message);
+
 /**
  * @brief 模块间通信封装
  * @note  通过module ID 识别模块
@@ -67,7 +70,7 @@ public:
      * @note sendFunc can do anything, etc.:call some function
      *       release a sem
      */
-    void sendEvent(uint16_t event, void (*sendFunc)(uint32_t))
+    void sendEvent(uint16_t event, void (*sendFunc)(uint32_t) = defaultEventSender)
     {
         uint16_t e = event & event_mask;
         if (e)
