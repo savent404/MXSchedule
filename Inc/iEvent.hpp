@@ -22,6 +22,10 @@
 #define EVENT_MODULE_ID_PARAM (1 << 4)
 #endif
 
+#ifndef EVENT_MODULE_ID_POWER
+#define EVENT_MODULE_ID_POWER (1 << 5)
+#endif
+
 extern void defaultEventSender(uint32_t message);
 extern bool defaultEventReciver(uint32_t& message);
 
