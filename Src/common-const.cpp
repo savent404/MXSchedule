@@ -108,7 +108,7 @@ const std::string typeFloatParam[6] = {
 
 const std::string typeRGBParam[3] = { "MC", "FC", "LC" };
 
-const std::string triggerName[11] = {
+const std::string triggerName[12] = {
     "Swing",
     "Slash",
     "Spin",
@@ -120,6 +120,7 @@ const std::string triggerName[11] = {
     "Combo",
     "In",
     "Out",
+    "ColorSwitch",
 };
 
 triggerID_t triggerName2ID(const char* trigger)

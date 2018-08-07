@@ -28,7 +28,7 @@ typedef enum {
 extern const std::string typeIntParam[44];
 extern const std::string typeFloatParam[6];
 extern const std::string typeRGBParam[3];
-extern const std::string triggerName[11];
+extern const std::string triggerName[12];
 
 /**
  * @brief triggerName2ID convert string to triggerID_t
