@@ -56,4 +56,9 @@ bool matchKeyValue(const char* input, std::string& key, int& v);
 bool matchKeyValue(const char* input, std::string& key, float& v);
 bool matchKeyValue(const char* input, std::string& key, RGB& v);
 
+#define DEBUG_LEVEL_VERBOSS (2)
+#define DEBUG_LEVEL_INFO    (1)
+#define DEBUG_LEVEL_ERROR   (0)
+
+void mDebug(int level, const char* str, ...);
 /** @} */

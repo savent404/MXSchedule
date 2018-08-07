@@ -2,6 +2,11 @@
 
 #include <stdint.h>
 #include <string>
+#include "systemSupport.h"
+
+#ifndef USE_QT
+#define USE_QT 1
+#endif
 
 /** @brief  trigger id */
 typedef enum {

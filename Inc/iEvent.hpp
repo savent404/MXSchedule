@@ -26,8 +26,12 @@
 #define EVENT_MODULE_ID_POWER (1 << 5)
 #endif
 
+#ifndef EVENT_MODULE_ID_HAND
+#define EVENT_MODULE_ID_HAND (1 << 6)
+#endif
+
 extern void defaultEventSender(uint32_t message);
-extern bool defaultEventReciver(uint32_t& message);
+extern bool defaultEventReciver(uint32_t& message, uint32_t timeout = 100);
 
 /**
  * @brief 模块间通信封装
@@ -52,7 +56,7 @@ public:
      */
     void setEventMask(uint16_t event)
     {
-        event_mask &= event;
+        event_mask = event;
     }
 
     /**
@@ -79,6 +83,16 @@ public:
         uint16_t e = event & event_mask;
         if (e)
             sendFunc((module_id << 16) | e);
+    }
+
+    static uint16_t getModuleID(const uint32_t eventMessage)
+    {
+        return uint16_t(eventMessage >> 16);
+    }
+
+    static uint16_t getEvent(const uint32_t eventMessage)
+    {
+        return uint16_t(eventMessage & 0xFFFF);
     }
 
 private:

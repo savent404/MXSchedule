@@ -31,7 +31,12 @@ public:
     }
 
     virtual ~iKey() {}
-
+    /**
+     * @brief get key status
+     * @param id
+     * @return if 0-not press | 1-pressed
+     */
+    virtual int getStatus(Key_t id) = 0;
     /**
      * @brief get last click duration
      * @param id etc. Key1,Key2

@@ -10,7 +10,7 @@ void iParam::setParameterFromLine(const char* line)
     static float aFloat;
     static RGB aRGB;
 
-    static char buffer[128];
+    char buffer[128];
     static string key;
 
     ripWords(line, buffer);
@@ -30,18 +30,22 @@ void iParam::setParameterFromLine(const char* line)
 void iParam::setColorParameterFromLine(const char* line)
 {
     static int configIndex = 0;
-    static char buffer[128];
-    static RGB rgb;
-    static std::string key;
+    char buffer[128];
+    RGB rgb;
+    std::string key; // reduce con/destruct time.
+
+    size_t RGBColorNum = sizeof(typeRGBParam) / sizeof(string);
 
     ripWords(line, buffer);
     if (matchKeyValue(buffer, key, rgb)) {
-        size_t RGBColorNum = sizeof(typeRGBParam) / sizeof(string);
         int pos = getArrayIndex(typeRGBParam, key.c_str(), RGBColorNum);
         if (pos < 0)
             return;
-        staticParam.configRGB[configIndex * RGBColorNum + pos] = rgb;
-    } else if (matchCFGn(buffer, configIndex)) {
+        int cood = configIndex * RGBColorNum + pos;
+        if (staticParam.configRGB.size() <= cood)
+            staticParam.configRGB.resize(cood + 1);
+        staticParam.configRGB.at(configIndex * RGBColorNum + pos) = rgb;
+    } else if (matchCFGn(buffer, configIndex) && configIndex > 0) {
         configIndex -= 1;
     }
 }
@@ -61,7 +65,7 @@ bool iParam::getParameter(const char* name, int& v) const
         v = staticParam.configRGBIndex[bankID - 1];
         return true;
     }
-    v = intParam[pos];
+    v = intParam.at(pos);
     return true;
 }
 
@@ -70,7 +74,7 @@ bool iParam::getParameter(const char* name, float& v) const
     int pos = getArrayIndex(&typeFloatParam[0], name, sizeof(typeFloatParam) / sizeof(string));
     if (pos < 0)
         return false;
-    v = floatParam[pos];
+    v = floatParam.at(pos);
     return true;
 }
 
@@ -83,13 +87,13 @@ bool iParam::getParameter(const char* name, RGB& v) const
     if (pos < 0)
         return false;
 
-    int configIndex = staticParam.configRGBIndex[getBankPos()];
+    int configIndex = staticParam.configRGBIndex.at(getBankPos());
 
     if (configIndex >= getBankNum()) {
         return false;
     }
 
-    v = staticParam.configRGB[configNum * configIndex + pos];
+    v = staticParam.configRGB.at(configNum * configIndex + pos);
     return true;
 }
 
@@ -102,10 +106,10 @@ bool iParam::setParameter(const char* name, const int& v)
         if (!matchBankn(name, bankID) || bankID > getBankNum()) {
             return false;
         }
-        staticParam.configRGBIndex[bankID - 1] = v;
+        staticParam.configRGBIndex.at(bankID - 1) = v;
         return true;
     }
-    intParam[pos] = v;
+    intParam.at(pos) = v;
     return true;
 }
 
@@ -115,7 +119,7 @@ bool iParam::setParameter(const char* name, const float& v)
 
     if (pos < 0)
         return false;
-    floatParam[pos] = v;
+    floatParam.at(pos) = v;
     return true;
 }
 
@@ -125,11 +129,11 @@ bool iParam::setParameter(const char* name, const RGB& v)
     int pos = getArrayIndex(typeRGBParam, name, configNum);
     if (pos < 0)
         return false;
-    int configIndex = staticParam.configRGBIndex[getBankPos()];
+    int configIndex = staticParam.configRGBIndex.at(getBankPos());
     if (size_t(configIndex) >= staticParam.configRGB.size()) {
         return false;
     }
-    staticParam.configRGB[configIndex * configNum + pos] = v;
+    staticParam.configRGB.at(configIndex * configNum + pos) = v;
     return true;
 }
 

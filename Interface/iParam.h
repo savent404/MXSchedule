@@ -15,8 +15,7 @@ class iParam : public iEvent {
 public:
     /** @brief iParam's event */
     typedef enum {
-        inited = 0x01,
-        crash = 0x02,
+        crash = 0x01,
     } event_t;
 
 protected:
@@ -90,12 +89,15 @@ protected:
     void setDefaultParameter();
 
 public:
+    bool inited;
+
     iParam(int bank = 0)
         : iEvent(EVENT_MODULE_ID_PARAM)
         , posBank(bank)
         , numBank(0)
+        , inited(false)
     {
-        setEventMask(inited | crash);
+        setEventMask(crash);
         // readStaticParameter();
         // switchBank(bank);
     }
