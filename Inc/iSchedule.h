@@ -31,6 +31,7 @@ public:
 
 private:
     iDriverList list;
+    iAudio::trackId_t trackIdTrigger;
 protected:
     stage_t stage;
     bool lockUpHoldOn;

@@ -3,7 +3,7 @@
 using namespace std;
 
 iShechdule::iShechdule(iDriverList l)
-    : list(l), stage(StageInit), lockUpHoldOn(false)
+    : list(l), stage(StageInit), lockUpHoldOn(false), trackIdTrigger(-1)
 {
     list.key->setEventMask(iKey::KEY_1_PRESS | iKey::KEY_1_RELEASE |
         iKey::KEY_2_PRESS | iKey::KEY_2_RELEASE);
@@ -87,8 +87,8 @@ void iShechdule::run()
                                list.param->getBankPos() + 1,
                                list.param->getBankNum(),
                                list.param->getBankName().c_str());
-                        audioPath = list.param->getPrefixPath() + "System/BankSwitch.wav";
-                        list.audio->play(audioPath.c_str());
+                        audioPath = list.param->getBankName() + "Bankswitch.wav";
+                        list.audio->_play(audioPath.c_str());
                         reciveSpecificEvent(message,
                                             EVENT_MODULE_ID_AUDIO,
                                             iAudio::end,
@@ -136,7 +136,7 @@ void iShechdule::run()
                     STOPLOCKUP:
                         lockUpHoldOn = false;
                         mDebug(DEBUG_LEVEL_VERBOSS, "T:lock up stop");
-                        // TODO: stop lock up
+                        list.audio->abort(trackIdTrigger);
                         continue;
                     }
                     int tForce, tLockup, tLockHold;
@@ -181,8 +181,8 @@ void iShechdule::run()
             }
             else if (StageCharged == stage)
             {
-                audioPath = list.param->getPrefixPath() + "System/Charged.wav";
-                list.audio->play(audioPath.c_str());
+                audioPath = list.param->getPrefixPath() + "System/Charging.wav";
+                list.audio->_play(audioPath.c_str());
                 reciveSpecificEvent(message,
                                     EVENT_MODULE_ID_AUDIO,
                                     iAudio::end,
@@ -191,11 +191,11 @@ void iShechdule::run()
             else if (StageCharging == stage)
             {
                 audioPath = list.param->getPrefixPath() + "System/Charging.wav";
-                list.audio->play(audioPath.c_str());
+                list.audio->_play(audioPath.c_str());
                 reciveSpecificEvent(message,
                                     EVENT_MODULE_ID_AUDIO,
                                     iAudio::end,
-                                    uint32_t(-1);
+                                    uint32_t(-1));
             }
         }
     }
@@ -254,7 +254,7 @@ void iShechdule::changeStage(stage_t newStage)
         mDebug(DEBUG_LEVEL_INFO, "Stage from init -> ready");
         stage = StageReady;
         audioPath = list.param->getPrefixPath() + "System/Boot.wav";
-        list.audio->play(audioPath.c_str());
+        list.audio->_play(audioPath.c_str());
         reciveSpecificEvent(message,
                             EVENT_MODULE_ID_AUDIO,
                             iAudio::end,
@@ -295,21 +295,38 @@ void iShechdule::playTrigger(triggerID_t id)
     case ColorSwitch:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:ColorSwitch");
+        trackIdTrigger = list.audio->play(id);
         break;
     }
     case Lockup:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Lockup start");
+        trackIdTrigger = list.audio->play(id);
         break;
     }
     case Blaster:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Blaster");
+        trackIdTrigger = list.audio->play(id);
         break;
     }
     case Force:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Forec");
+        break;
+    }
+    case Out:
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "T:Out");
+        list.audio->mainTrack(true);
+        trackIdTrigger = list.audio->play(id);
+        break;
+    }
+    case In:
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "T:In");
+        trackIdTrigger = list.audio->play(id);
+        list.audio->mainTrack(false);
         break;
     }
     default:

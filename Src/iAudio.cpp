@@ -8,7 +8,8 @@ iAudio::trackId_t iAudio::play(triggerID_t id)
     string dirPath;
     if (ColorSwitch == id)
     {
-        filePath = parameter->getBankName() + "ColorSwitch.wav";
+        dirPath = parameter->getPrefixPath() + "System/";
+        filePath = "ColorSwitch.wav";
     }
     else if (Unknow == id)
     {
@@ -31,7 +32,7 @@ iAudio::trackId_t iAudio::play(triggerID_t id)
         }
     }
 
-    return _play((dirPath + "/" + filePath).c_str());
+    return _play((dirPath + "/" + filePath).c_str(), Lockup == id ? loop : oneShout);
 }
 
 iAudio::trackId_t iAudio::mainTrack(bool enable)
