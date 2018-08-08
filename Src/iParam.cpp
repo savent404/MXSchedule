@@ -197,3 +197,8 @@ int iParam::getTriggerNum(triggerID_t id) const
 {
     return triggerNum[id];
 }
+
+string iParam::getPrefixPath() const
+{
+    return workPath;
+}

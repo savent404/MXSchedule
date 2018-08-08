@@ -157,6 +157,12 @@ public:
     std::string getBankName() const;
 
     /**
+     * @brief get Bank's prefix path
+     * @return string
+     */
+    std::string getPrefixPath() const;
+
+    /**
      * @brief getTriggerNum
      * @param id
      * @return number

@@ -1,5 +1,7 @@
 #include "iSchedule.h"
 
+using namespace std;
+
 iShechdule::iShechdule(iDriverList l)
     : list(l), stage(StageInit), lockUpHoldOn(false)
 {
@@ -20,6 +22,9 @@ void iShechdule::run()
     uint16_t event;
 
     uint16_t handEvent = 0;
+    
+    static string audioPath;
+
 #if USE_QT == 1
     changeStage(StageReady);
 #else
@@ -76,13 +81,18 @@ void iShechdule::run()
                                             iKey::KEY_2_RELEASE,
                                             tBankSwitch))
                     {
-                        //TODO: BankSwitch
                         list.param->switchBank();
                         mDebug(DEBUG_LEVEL_INFO,
                                "Bank Switch:%d/%d:%s",
                                list.param->getBankPos() + 1,
                                list.param->getBankNum(),
                                list.param->getBankName().c_str());
+                        audioPath = list.param->getPrefixPath() + "System/BankSwitch.wav";
+                        list.audio->play(audioPath.c_str());
+                        reciveSpecificEvent(message,
+                                            EVENT_MODULE_ID_AUDIO,
+                                            iAudio::end,
+                                            uint32_t(-1));
                     }
                 }
             }
@@ -171,11 +181,21 @@ void iShechdule::run()
             }
             else if (StageCharged == stage)
             {
-                // TODO: Play charged
+                audioPath = list.param->getPrefixPath() + "System/Charged.wav";
+                list.audio->play(audioPath.c_str());
+                reciveSpecificEvent(message,
+                                    EVENT_MODULE_ID_AUDIO,
+                                    iAudio::end,
+                                    uint32_t(-1));
             }
             else if (StageCharging == stage)
             {
-                // TODO: Play Charging
+                audioPath = list.param->getPrefixPath() + "System/Charging.wav";
+                list.audio->play(audioPath.c_str());
+                reciveSpecificEvent(message,
+                                    EVENT_MODULE_ID_AUDIO,
+                                    iAudio::end,
+                                    uint32_t(-1);
             }
         }
     }
@@ -213,6 +233,10 @@ void iShechdule::changeStage(stage_t newStage)
 {
     stage_t now = stage;
     stage_t next = newStage;
+    static string audioPath;
+    uint32_t message;
+    uint16_t moduleID;
+    uint16_t event;
 
     /** bit map
      * \ | 0 1 2 3 4 5 | new\now
@@ -227,9 +251,14 @@ void iShechdule::changeStage(stage_t newStage)
 
     if (StageInit == now && StageReady == next)
     {
-        // TODO: Power on
         mDebug(DEBUG_LEVEL_INFO, "Stage from init -> ready");
         stage = StageReady;
+        audioPath = list.param->getPrefixPath() + "System/Boot.wav";
+        list.audio->play(audioPath.c_str());
+        reciveSpecificEvent(message,
+                            EVENT_MODULE_ID_AUDIO,
+                            iAudio::end,
+                            uint32_t(-1));
     }
     else if (StageRunning == now && StageReady == next)
     {
