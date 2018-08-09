@@ -45,6 +45,7 @@ protected:
     bool lockUpHoldOn;
     void errorHandle(uint32_t message);
     bool reciveSpecificEvent(uint32_t& message, uint16_t moduleID, uint16_t event, uint32_t timeout);
+    void handlePowerManageEvent(uint16_t event);
 public:
     iShechdule(iDriverList l);
     virtual ~iShechdule();

@@ -27,12 +27,27 @@ void iShechdule::run()
 
     while (1)
     {
+        // stage Charging->Charged or Charged->Charging
+        if (StageCharging == stage &&
+            iPower::stage_full == list.power->getStatus())
+        {
+            changeStage(StageCharged);
+        }
+        else if (StageCharged == stage &&
+                 iPower::stage_full != list.power->getStatus())
+        {
+            changeStage(StageCharging);
+        }
+
         if (defaultEventReciver(cached.message, defaultInterval) == false)
         {
             continue;
         }
         cached.moduleID = iEvent::getModuleID(cached.message);
         cached.event = iEvent::getEvent(cached.message);
+
+        if (cached.moduleID == EVENT_MODULE_ID_POWER)
+            handlePowerManageEvent(cached.event);
 
         // response Key board event
         if (cached.moduleID == EVENT_MODULE_ID_KEY &&
@@ -211,36 +226,80 @@ bool iShechdule::reciveSpecificEvent(uint32_t& message, uint16_t moduleID, uint1
     return true;
 }
 
+void iShechdule::handlePowerManageEvent(uint16_t event)
+{
+    if (event & iPower::event_level2)
+    {
+        mDebug(DEBUG_LEVEL_INFO, "Recharge");
+        bool warningEnable = StageReady == stage ||
+                StageRunning == stage ||
+                StageInit == stage;
+        if (warningEnable)
+        {
+            for (int i = 0; i < 3; i++)
+                list.audio->abort(i);
+            cached.str = list.param->getPrefixPath() + "System/Recharge.wav";
+            list.audio->_play(cached.str.c_str());
+            reciveSpecificEvent(cached.message,
+                                EVENT_MODULE_ID_AUDIO,
+                                iAudio::end,
+                                uint32_t(-1));
+            stage = StageReady;
+            changeStage(StagePowerOff);
+            return;
+        }
+    }
+    if (event & iPower::event_level1)
+    {
+        mDebug(DEBUG_LEVEL_INFO, "LowPower");
+        bool warningEnable = StageReady == stage ||
+                StageRunning == stage ||
+                StageInit == stage;
+        if (warningEnable)
+        {
+            cached.str = list.param->getPrefixPath() + "System/lowpower.wav";
+            list.audio->_play(cached.str.c_str());
+        }
+    }
+    if (event & iPower::event_plugin)
+    {
+        changeStage(StageCharging);
+    }
+    if (event & iPower::event_plugout)
+    {
+        changeStage(StagePowerOff);
+    }
+}
+
 void iShechdule::errorHandle(uint32_t message)
 {
-    // no thing
+    cached.moduleID = iEvent::getModuleID(message);
+    cached.event = iEvent::getEvent(message);
+    if (cached.moduleID == EVENT_MODULE_ID_POWER)
+        handlePowerManageEvent(cached.event);
 }
 void iShechdule::changeStage(stage_t newStage)
 {
     stage_t now = stage;
     stage_t next = newStage;
-    static string audioPath;
-    uint32_t message;
-    uint16_t moduleID;
-    uint16_t event;
 
     /** bit map
      * \ | 0 1 2 3 4 5 | new\now
      * - | - - - - - - -
-     * 0 | - O O O O O |
-     * 1 | X - X O O O |
-     * 2 | O X - O O O |
-     * 3 | O O O - O O |
-     * 4 | O O O O - O |
-     * 5 | O X O O O - |
+     * 0 | - O O X O O |
+     * 1 | X - X X O O |
+     * 2 | O X - X O O |
+     * 3 | O O O - X O |
+     * 4 | O O O X - O |
+     * 5 | O X O X X - |
      */
 
     if (StageInit == now && StageReady == next)
     {
         mDebug(DEBUG_LEVEL_INFO, "Stage from init -> ready");
         stage = StageReady;
-        audioPath = list.param->getPrefixPath() + "System/Boot.wav";
-        list.audio->_play(audioPath.c_str());
+        cached.str = list.param->getPrefixPath() + "System/Boot.wav";
+        list.audio->_play(cached.str.c_str());
     }
     else if (StageRunning == now && StageReady == next)
     {
@@ -257,8 +316,15 @@ void iShechdule::changeStage(stage_t newStage)
     }
     else if (StageReady == now && StagePowerOff == next)
     {
-        // TODO: System power off
         mDebug(DEBUG_LEVEL_INFO, "Stage from ready -> power off");
+        stage = StagePowerOff;
+        cached.str = list.param->getPrefixPath() + "System/Poweroff.wav";
+        list.audio->_play(cached.str.c_str());
+    }
+    else if ((StageCharged == now || StageCharging == now) &&
+             StagePowerOff == next)
+    {
+        mDebug(DEBUG_LEVEL_INFO, "Stage from charge -> power off");
         stage = StagePowerOff;
     }
     else if (StageReady == now && StageRunning == next)
@@ -267,6 +333,26 @@ void iShechdule::changeStage(stage_t newStage)
         mDebug(DEBUG_LEVEL_INFO, "Stage from ready -> run");
         playTrigger(Out);
         stage = StageRunning;
+    }
+    else if (StageCharging == next && StagePowerOff != now)
+    {
+        mDebug(DEBUG_LEVEL_INFO, "Stage goto charging");
+        stage = StageCharging;
+    }
+    else if (StageCharged == next && StageCharging == now)
+    {
+        mDebug(DEBUG_LEVEL_INFO, "Stage from charging->charged");
+        stage = StageCharged;
+    }
+    else if (StageCharged == now && StageCharging == next)
+    {
+        mDebug(DEBUG_LEVEL_INFO, "Stage from charged->charging");
+        stage = StageCharging;
+    }
+    else
+    {
+        mDebug(DEBUG_LEVEL_ERROR, "Unspport stage change:%d->%d",
+               now, next);
     }
 }
 
