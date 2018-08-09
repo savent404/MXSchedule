@@ -17,13 +17,7 @@ void iShechdule::run()
 {
     const uint32_t defaultInterval = 10; // 10 ms
 
-    uint32_t message;
-    uint16_t moduleID;
-    uint16_t event;
-
     uint16_t handEvent = 0;
-    
-    static string audioPath;
 
 #if USE_QT == 1
     changeStage(StageReady);
@@ -33,19 +27,20 @@ void iShechdule::run()
 
     while (1)
     {
-        if (defaultEventReciver(message, defaultInterval) == false)
+        if (defaultEventReciver(cached.message, defaultInterval) == false)
         {
             continue;
         }
-        moduleID = iEvent::getModuleID(message);
-        event = iEvent::getEvent(message);
+        cached.moduleID = iEvent::getModuleID(cached.message);
+        cached.event = iEvent::getEvent(cached.message);
 
         // response Key board event
-        if (moduleID == EVENT_MODULE_ID_KEY)
+        if (cached.moduleID == EVENT_MODULE_ID_KEY &&
+                cached.event & (iKey::KEY_1_PRESS | iKey::KEY_2_PRESS))
         {
             if (StageReady == stage)
             {
-                if (event & iKey::KEY_1_PRESS)
+                if (cached.event & iKey::KEY_1_PRESS)
                 {
                     int tOut, tPowerOff;
                     uint32_t stamp = mGetCPUTime();
@@ -55,7 +50,7 @@ void iShechdule::run()
                     stage_t smallerStage = tOut > tPowerOff ? StagePowerOff : StageRunning;
                     int biggerTime = tOut > tPowerOff ? tOut : tPowerOff;
                     int smallerTime = tOut > tPowerOff ? tPowerOff : tOut;
-                    if (reciveSpecificEvent(message,
+                    if (reciveSpecificEvent(cached.message,
                                             EVENT_MODULE_ID_KEY,
                                             iKey::KEY_1_RELEASE,
                                             biggerTime))
@@ -72,11 +67,11 @@ void iShechdule::run()
                         changeStage(biggerStage);
                     }
                 }
-                else if (event & iKey::KEY_2_PRESS)
+                else if (cached.event & iKey::KEY_2_PRESS)
                 {
                     int tBankSwitch;
                     list.param->getParameter("T_BankSwitch", tBankSwitch);
-                    if (!reciveSpecificEvent(message,
+                    if (!reciveSpecificEvent(cached.message,
                                             EVENT_MODULE_ID_KEY,
                                             iKey::KEY_2_RELEASE,
                                             tBankSwitch))
@@ -87,9 +82,9 @@ void iShechdule::run()
                                list.param->getBankPos() + 1,
                                list.param->getBankNum(),
                                list.param->getBankName().c_str());
-                        audioPath = list.param->getBankName() + "Bankswitch.wav";
-                        list.audio->_play(audioPath.c_str());
-                        reciveSpecificEvent(message,
+                        cached.str = list.param->getBankName() + "Bankswitch.wav";
+                        list.audio->_play(cached.str.c_str());
+                        reciveSpecificEvent(cached.message,
                                             EVENT_MODULE_ID_AUDIO,
                                             iAudio::end,
                                             uint32_t(-1));
@@ -98,24 +93,24 @@ void iShechdule::run()
             }
             else if (StageRunning == stage)
             {
-                if (event & iKey::KEY_1_PRESS)
+                if (cached.event & iKey::KEY_1_PRESS)
                 {
                     int tIn, tColorSwitch;
                     list.param->getParameter("T_in", tIn);
                     list.param->getParameter("T_colorswitch", tColorSwitch);
 
-                    if (reciveSpecificEvent(message,
+                    if (reciveSpecificEvent(cached.message,
                                             EVENT_MODULE_ID_KEY,
                                             iKey::KEY_1_RELEASE | iKey::KEY_2_PRESS,
                                             tIn))
                     {
-                        uint16_t event = iKey::getEvent(message);
-                        if (event & iKey::KEY_1_RELEASE)
+                        cached.event = iKey::getEvent(cached.message);
+                        if (cached.event & iKey::KEY_1_RELEASE)
                         {
                         }
-                        else if (event & iKey::KEY_2_PRESS)
+                        else if (cached.event & iKey::KEY_2_PRESS)
                         {
-                            if (!reciveSpecificEvent(message,
+                            if (!reciveSpecificEvent(cached.message,
                                                      EVENT_MODULE_ID_KEY,
                                                      iKey::KEY_2_RELEASE,
                                                      tColorSwitch))
@@ -129,7 +124,7 @@ void iShechdule::run()
                         changeStage(StageReady);
                     }
                 }
-                else if (event & iKey::KEY_2_PRESS)
+                else if (cached.event & iKey::KEY_2_PRESS)
                 {
                     if (lockUpHoldOn == true)
                     {
@@ -147,14 +142,14 @@ void iShechdule::run()
 
                     uint16_t handMask = iHand::handClash | iHand::handSlash | iHand::handSpin;
                     if (handMask & handEvent ||
-                        reciveSpecificEvent(message,
+                        reciveSpecificEvent(cached.message,
                                             EVENT_MODULE_ID_HAND | EVENT_MODULE_ID_KEY,
                                             handMask | iKey::KEY_2_RELEASE,
                                             tForce > tLockup ? tForce : tLockup))
                     {
-                        moduleID = iEvent::getModuleID(message);
-                        event = iEvent::getEvent(message);
-                        if (moduleID == EVENT_MODULE_ID_HAND)
+                        cached.moduleID = iEvent::getModuleID(cached.message);
+                        cached.event = iEvent::getEvent(cached.message);
+                        if (cached.moduleID == EVENT_MODULE_ID_HAND)
                             playTrigger(Force);
                         else
                             playTrigger(Blaster);
@@ -162,7 +157,7 @@ void iShechdule::run()
                     else
                     {
                         playTrigger(Lockup);
-                        if (reciveSpecificEvent(message,
+                        if (reciveSpecificEvent(cached.message,
                                                 EVENT_MODULE_ID_KEY,
                                                 iKey::KEY_2_RELEASE,
                                                 tLockHold))
@@ -181,13 +176,13 @@ void iShechdule::run()
             }
             else if (StageCharged == stage)
             {
-                audioPath = list.param->getPrefixPath() + "System/Charging.wav";
-                list.audio->_play(audioPath.c_str());
+                cached.str = list.param->getPrefixPath() + "System/charging.wav";
+                list.audio->_play(cached.str.c_str());
             }
             else if (StageCharging == stage)
             {
-                audioPath = list.param->getPrefixPath() + "System/Charging.wav";
-                list.audio->_play(audioPath.c_str());
+                cached.str = list.param->getPrefixPath() + "System/charging.wav";
+                list.audio->_play(cached.str.c_str());
             }
         }
     }
@@ -195,7 +190,6 @@ void iShechdule::run()
 bool iShechdule::reciveSpecificEvent(uint32_t& message, uint16_t moduleID, uint16_t event, uint32_t timeout)
 {
     uint32_t stamp = mGetCPUTime();
-    uint16_t rM = 0, rE = 0; 
     bool flag = false;
     while (!flag)
     {
@@ -205,10 +199,10 @@ bool iShechdule::reciveSpecificEvent(uint32_t& message, uint16_t moduleID, uint1
         bool stamp = defaultEventReciver(message, timeout - spendTime);
         if (stamp == true)
         {
-            rM = iEvent::getModuleID(message);
-            rE = iEvent::getEvent(message);
+            cached.moduleID = iEvent::getModuleID(message);
+            cached.event = iEvent::getEvent(message);
             errorHandle(message);
-            if (rM & moduleID && (rE & event))
+            if (cached.moduleID & moduleID && (cached.event & event))
                 flag = true;
         }
         else

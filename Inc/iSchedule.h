@@ -33,6 +33,14 @@ private:
     iDriverList list;
     iAudio::trackId_t trackIdTrigger;
 protected:
+
+    struct cacheVar {
+        std::string str;
+        uint32_t message;
+        uint16_t moduleID;
+        uint16_t event;
+    } cached;
+
     stage_t stage;
     bool lockUpHoldOn;
     void errorHandle(uint32_t message);
