@@ -183,19 +183,11 @@ void iShechdule::run()
             {
                 audioPath = list.param->getPrefixPath() + "System/Charging.wav";
                 list.audio->_play(audioPath.c_str());
-                reciveSpecificEvent(message,
-                                    EVENT_MODULE_ID_AUDIO,
-                                    iAudio::end,
-                                    uint32_t(-1));
             }
             else if (StageCharging == stage)
             {
                 audioPath = list.param->getPrefixPath() + "System/Charging.wav";
                 list.audio->_play(audioPath.c_str());
-                reciveSpecificEvent(message,
-                                    EVENT_MODULE_ID_AUDIO,
-                                    iAudio::end,
-                                    uint32_t(-1));
             }
         }
     }
@@ -255,10 +247,6 @@ void iShechdule::changeStage(stage_t newStage)
         stage = StageReady;
         audioPath = list.param->getPrefixPath() + "System/Boot.wav";
         list.audio->_play(audioPath.c_str());
-        reciveSpecificEvent(message,
-                            EVENT_MODULE_ID_AUDIO,
-                            iAudio::end,
-                            uint32_t(-1));
     }
     else if (StageRunning == now && StageReady == next)
     {
