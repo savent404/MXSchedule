@@ -6,7 +6,13 @@
 
 #ifndef USE_QT
 #define USE_QT 1
+#define BLADE_PIXEL 256
 #endif
+
+#ifndef BLADE_PIXEL
+#define BLADE_PIXEL 96
+#endif
+
 
 /** @brief  trigger id */
 typedef enum {
