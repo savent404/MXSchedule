@@ -14,11 +14,6 @@ class iBladeDriver
   protected:
     RGB *vector;
 
-    inline bool rangeCheck(size_t a)
-    {
-        return a >= getPixelNum() ? true : false;
-    }
-
   public:
     iBladeDriver(size_t pixelNum)
     {
@@ -68,10 +63,10 @@ class iBladeDriver
     {
         RGB *_ptr = ptr();
         size_t num = end - start;
-        if (rangeCheck(start) || rangeCheck(end))
-            return;
         for (size_t i = 0; i < num; i++)
         {
+            if (i < 0 || i >= getPixelNum())
+                continue;
             *_ptr++ = color;
         }
     }
@@ -86,17 +81,15 @@ class iBladeDriver
      */
     void drawShade(RGB &colorStart,
                    RGB &colorEnd,
-                   size_t posStart,
-                   size_t posEnd)
+                   int posStart,
+                   int posEnd)
     {
         if (colorStart.similar(colorEnd))
             drawLine(colorStart, posStart, posEnd);
 
         int sub[4];
-        RGB *_ptr = ptr();
+        RGB *_ptr = posStart >= 0 ? ptr() + posStart : ptr();
         int num = posEnd - posStart;
-        if (rangeCheck(posStart) || rangeCheck(posEnd))
-            return;
 
         sub[0] = colorEnd.R - colorStart.R;
         sub[1] = colorEnd.G - colorStart.G;
@@ -105,6 +98,8 @@ class iBladeDriver
 
         for (int i = 0; i < num; i++)
         {
+            if (i + posStart < 0 || i + posStart >= getPixelNum())
+                continue;
             *_ptr++ = RGB(colorStart,
                           sub[0] * i / num,
                           sub[1] * i / num,
@@ -115,25 +110,94 @@ class iBladeDriver
     virtual void update() = 0;
 };
 
+typedef struct vertex_t
+{
+    vertex_t(RGB c, int p) : color(c), pos(p){}
+    RGB color;
+    int pos;
+} vertex_t;
+
+typedef struct step_t {
+
+    step_t(int now, int total, int cnt=0)
+    {
+        nowStep = now;
+        totalStep = total;
+        repeatCnt = cnt;
+    }
+
+    /**
+     * @brief walk
+     * @return if finish
+     */
+    bool walk()
+    {
+        bool finishALoop = ++nowStep >= totalStep;
+        if (finishALoop)
+        {
+            nowStep = 0;
+            if (repeatCnt == 0)
+                return true;
+            else if (repeatCnt > 0)
+                repeatCnt--;
+        }
+        return false;
+    }
+
+    int nowStep;
+    int totalStep;
+    int repeatCnt;
+} step_t;
+
 class iBlade : public iEvent, public iBladeDriver
 {
   protected:
     const iParam *parameter;
+  protected: // API
+    /**
+     * @name BackGround
+     * @{ */
+    void drawBackGroundStatic();
+    void drawBackGroundShade();
+    void drawBackGroundStaticRainbow();
+    void drawBackGroundDynamicRainbow(step_t& step);
+    void drawBackGroundFlame();
+    /** @} */
 
+    /**
+     * @name Dynamic Filter
+     * @{ */
+    void drawFilterStatic();
+    void drawFilterBreath();
+    void drawFilterFlow();
+    void drawFilterSpark();
+    void drawFilterRain();
+    void drawFilterVolFollow();
+    /** @} */
+
+protected: // vars
+    bool isActive;
+    bool needClear;
+    step_t stepBackGround;
   public:
     /**
      * @brief event
      */
     typedef enum event_t
     {
-        start = 0x01,
-        end = 0x02
+        event_start = 0x01,
+        event_end = 0x02
     } event_t;
 
     iBlade(const iParam *p)
-        : iEvent(EVENT_MODULE_ID_BLADE), parameter(p), iBladeDriver(BLADE_PIXEL)
+        : iEvent(EVENT_MODULE_ID_BLADE)
+        , parameter(p)
+        , iBladeDriver(BLADE_PIXEL)
+        , stepBackGround(0, 2000/BLADE_INTERVAL, -1)
     {
-        setEventMask(start);
+        setEventMask(0);
+        isActive = false;
+        needClear = true;
     }
 
     virtual ~iBlade()
@@ -141,7 +205,9 @@ class iBlade : public iEvent, public iBladeDriver
         delete vector;
     }
 
-    virtual bool play(triggerID_t id) = 0;
+public:
+    void hanlde();
 
-    virtual bool abort(triggerID_t id) = 0;
+    virtual bool play(triggerID_t id);
+    virtual bool abort(triggerID_t id);
 };

@@ -6,11 +6,19 @@
 
 #ifndef USE_QT
 #define USE_QT 1
+#endif
+
+#if USE_QT == 1
 #define BLADE_PIXEL 256
+#define BLADE_INTERVAL 20
 #endif
 
 #ifndef BLADE_PIXEL
 #define BLADE_PIXEL 96
+#endif
+
+#ifndef BLADE_INTERVAL
+#define BLADE_INTERVAL 20
 #endif
 
 

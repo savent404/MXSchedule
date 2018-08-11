@@ -90,7 +90,8 @@ bool matchKeyValue(const char* input, string& key, RGB& v)
     v.R = uint8_t(vBuffer[0]);
     v.G = uint8_t(vBuffer[1]);
     v.B = uint8_t(vBuffer[2]);
-    v.W = uint8_t(vBuffer[3]);
+    v.W = 255;
+//    v.W = uint8_t(vBuffer[3]);
     key = nameBuffer;
     return true;
 }
