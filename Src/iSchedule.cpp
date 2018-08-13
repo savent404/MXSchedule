@@ -364,23 +364,27 @@ void iShechdule::playTrigger(triggerID_t id)
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:ColorSwitch");
         trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
         break;
     }
     case Lockup:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Lockup start");
         trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
         break;
     }
     case Blaster:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Blaster");
         trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
         break;
     }
     case Force:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Forec");
+        list.blade->play(id);
         break;
     }
     case Out:
@@ -388,6 +392,7 @@ void iShechdule::playTrigger(triggerID_t id)
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Out");
         list.audio->mainTrack(true);
         trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
         break;
     }
     case In:
@@ -395,6 +400,7 @@ void iShechdule::playTrigger(triggerID_t id)
         mDebug(DEBUG_LEVEL_VERBOSS, "T:In");
         trackIdTrigger = list.audio->play(id);
         list.audio->mainTrack(false);
+        list.blade->play(id);
         break;
     }
     default:
