@@ -39,7 +39,7 @@ typedef enum {
     ColorSwitch = 11,
 } triggerID_t;
 
-extern const std::string typeIntParam[44];
+extern const std::string typeIntParam[43];
 extern const std::string typeFloatParam[6];
 extern const std::string typeRGBParam[3];
 extern const std::string triggerName[12];

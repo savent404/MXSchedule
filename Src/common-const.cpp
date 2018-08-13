@@ -26,8 +26,8 @@
  *  - M_InOut   In/Out执行时间 (0=计时亮起 1=跟随音效)
  *  - T_LOut    开剑 LED 动画时间
  *  - T_LIn     收剑 LED 动画时间
- *  - T_Max     最大亮度
- *  - T_Min     最小亮度
+ *  - L_Max     最大亮度
+ *  - L_Min     最小亮度
  * - EFFECT.txt 一类(type 1) 触发参数
  *  - T_Swingfreeze
  *  - T_SpinFreeze
@@ -41,7 +41,7 @@
  *  - T_Lockup
  *  - T_LockupHold
  */
-const std::string typeIntParam[44] = {
+const std::string typeIntParam[43] = {
     // SETTING.txt
     "Mode",
     "SystemVol",
@@ -64,8 +64,8 @@ const std::string typeIntParam[44] = {
     "M_InOut",
     "T_LOut",
     "T_LIn",
-    "T_Max",
-    "T_Min",
+    "L_Max",
+    "L_Min",
 
     "T_Swingfreeze",
     "T_SpinFreeze",
@@ -83,7 +83,6 @@ const std::string typeIntParam[44] = {
     "NP_Cset",
     "NP_PartSparkCount",
     "NP_Amode",
-    "NP_Tflowlength",
     "NP_TComet",
 
     "NP_SwingMode",
