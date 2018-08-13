@@ -106,7 +106,7 @@ bool iParam::setParameter(const char* name, const int& v)
         if (!matchBankn(name, bankID) || bankID > getBankNum()) {
             return false;
         }
-        staticParam.configRGBIndex.at(bankID - 1) = v;
+        staticParam.configRGBIndex.at(bankID - 1) = v - 1;
         return true;
     }
     intParam.at(pos) = v;
