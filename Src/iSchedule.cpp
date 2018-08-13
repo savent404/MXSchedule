@@ -64,7 +64,7 @@ void iShechdule::run()
                     stage_t biggerStage = tOut > tPowerOff ? StageRunning : StagePowerOff;
                     stage_t smallerStage = tOut > tPowerOff ? StagePowerOff : StageRunning;
                     int biggerTime = tOut > tPowerOff ? tOut : tPowerOff;
-                    int smallerTime = tOut > tPowerOff ? tPowerOff : tOut;
+                    uint32_t smallerTime = tOut > tPowerOff ? tPowerOff : tOut;
                     if (reciveSpecificEvent(cached.message,
                                             EVENT_MODULE_ID_KEY,
                                             iKey::KEY_1_RELEASE,
@@ -208,7 +208,7 @@ bool iShechdule::reciveSpecificEvent(uint32_t& message, uint16_t moduleID, uint1
     bool flag = false;
     while (!flag)
     {
-        int spendTime = mGetCPUTime() - stamp;
+        uint32_t spendTime = mGetCPUTime() - stamp;
         if (spendTime > timeout)
             return false;
         bool stamp = defaultEventReciver(message, timeout - spendTime);
