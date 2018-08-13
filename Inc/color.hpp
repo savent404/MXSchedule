@@ -9,7 +9,7 @@ class RGB
     uint8_t R;
     uint8_t G;
     uint8_t B;
-    uint8_t W;
+    uint8_t W; // user cant see it!
 
     RGB(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t w = 255)
         : R(r), G(g), B(b), W(w)
@@ -35,7 +35,6 @@ class RGB
         B = r.B + offset_b;
         W = r.W + offset_w;
     }
-
     RGB &operator=(const RGB &other)
     {
         if (&other == this)
@@ -86,7 +85,7 @@ class RGB
     uint8_t light() const
     {
         int sum = R + G + B;
-        return (sum * W) >> 8;
+        return sum / 3;
     }
     uint8_t realLight() const
     {
