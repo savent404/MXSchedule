@@ -45,12 +45,26 @@ class RGB
         W = other.W;
         return *this;
     }
-    RGB &operator-(const RGB &other)
+    RGB &operator-=(const RGB &other)
     {
         R -= other.R;
         G -= other.G;
         B -= other.B;
-        W -= other.W;
+        return *this;
+    }
+    RGB &operator+=(const RGB &other)
+    {
+        R += other.R;
+        G += other.G;
+        B += other.B;
+        return *this;
+    }
+    RGB &operator *=(const float q)
+    {
+        R *= q;
+        G *= q;
+        B *= q;
+        return *this;
     }
     bool operator==(const RGB &other)
     {
