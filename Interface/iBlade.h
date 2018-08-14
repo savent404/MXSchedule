@@ -6,6 +6,11 @@
 #include <stdint.h>
 #include "color.hpp"
 
+// length(0.0f...1.0f)
+#ifndef BLADE_COMET_LENGTH
+#define BLADE_COMET_LENGTH (0.2f)
+#endif
+
 class iBladeDriver
 {
   private:
@@ -175,17 +180,30 @@ class iBlade : public iEvent, public iBladeDriver
      * @name Dynamic Filter
      * @{ */
     void drawFilterStatic();
-    void drawFilterBreath();
-    void drawFilterFlow();
+    void drawFilterBreath(step_t &step);
+    void drawFilterFlow(step_t &step);
     void drawFilterSpark();
     void drawFilterRain();
     void drawFilterVolFollow();
     /** @} */
 
+    /**
+     * @name Trigger
+     * @{ */
+    void drawTriggerNone();
+    void drawTriggerSpark(step_t &step);
+    void drawTriggerPartialSpark(step_t &step);
+    void drawTriggerFollowVol();
+    void drawTriggerComet(step_t &step);
+    /** @} */
+
 protected: // vars
     bool isActive;
     bool needClear;
+    int modeTrigger; //1~5, -1 means invalide
     step_t stepBackGround;
+    step_t stepFilter;
+    step_t stepTrigger;
   public:
     /**
      * @brief event
@@ -201,6 +219,8 @@ protected: // vars
         , parameter(p)
         , iBladeDriver(BLADE_PIXEL)
         , stepBackGround(0, 2000/BLADE_INTERVAL, -1)
+        , stepTrigger(0, 0, 0)
+        , stepFilter(0, 0, -1)
     {
         setEventMask(0);
         isActive = false;
@@ -216,5 +236,5 @@ public:
     void hanlde();
 
     virtual bool play(triggerID_t id);
-    virtual bool abort(triggerID_t id);
+    virtual bool abort(triggerID_t id = Unknow);
 };
