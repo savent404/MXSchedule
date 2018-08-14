@@ -117,6 +117,13 @@ typedef struct vertex_t
     int pos;
 } vertex_t;
 
+/**
+ * @brief step_t descript animation process
+ * @param repeatCnt if == -1 means infinity loop
+ *                  if == 0 means no repeat
+ * @param totalStep operat times
+ * @param nowStep
+ */
 typedef struct step_t {
 
     step_t(int now, int total, int cnt=0)
