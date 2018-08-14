@@ -105,11 +105,11 @@ class iBladeDriver
         {
             if (i + posStart < 0 || i + posStart >= getPixelNum())
                 continue;
-            *_ptr++ = RGB(colorStart,
-                          sub[0] * i / num,
-                          sub[1] * i / num,
-                          sub[2] * i / num,
-                          sub[3] * i / num);
+            _ptr->R = colorStart.R + sub[0] * i / num;
+            _ptr->G = colorStart.G + sub[1] * i / num;
+            _ptr->B = colorStart.B + sub[2] * i / num;
+            _ptr->W = colorStart.W;
+            _ptr++;
         }
     }
     virtual void update() = 0;
