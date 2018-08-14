@@ -221,6 +221,7 @@ protected: // vars
         , stepBackGround(0, 2000/BLADE_INTERVAL, -1)
         , stepTrigger(0, 0, 0)
         , stepFilter(0, 0, -1)
+        , modeTrigger(-1)
     {
         setEventMask(0);
         isActive = false;
