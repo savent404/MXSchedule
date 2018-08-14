@@ -9,7 +9,7 @@
 class iBladeDriver
 {
   private:
-    size_t numPixe;
+    int numPixe;
 
   protected:
     RGB *vector;
@@ -25,12 +25,12 @@ class iBladeDriver
         delete vector;
     }
 
-    size_t getPixelNum() const
+    int getPixelNum() const
     {
         return numPixe;
     }
 
-    RGB &operator[](size_t pos)
+    RGB &operator[](int pos)
     {
         if (pos > numPixe)
         {
@@ -59,11 +59,11 @@ class iBladeDriver
      * @param start [0...pixelNum-1]
      * @param end   [0...pixelNum-1]
      */
-    void drawLine(RGB &color, size_t start, size_t end)
+    void drawLine(RGB &color, int start, int end)
     {
         RGB *_ptr = ptr();
-        size_t num = end - start;
-        for (size_t i = 0; i < num; i++)
+        int num = end - start;
+        for (int i = 0; i < num; i++)
         {
             if (i < 0 || i >= getPixelNum())
                 continue;
