@@ -187,6 +187,9 @@ void iBlade::drawTriggerComet(step_t &step)
     int pos = posEnd - length;
     int i = 0;
 
+    if (pos >= 0)
+        _p += pos;
+
     parameter->getParameter("FC", mainColor);
 
     for (; i < length; i++, pos++)
@@ -198,6 +201,7 @@ void iBlade::drawTriggerComet(step_t &step)
         a = mainColor;
         a *= rate;
         _p->operator +=(a);
+        _p++;
     }
 }
 
