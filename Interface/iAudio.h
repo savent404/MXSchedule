@@ -102,4 +102,11 @@ public:
      * @return
      */
     virtual bool abort(trackId_t id) = 0;
+
+    /**
+     * @brief getTrackDuration get audio last time(ms)
+     * @param id
+     * @return last time(ms)
+     */
+    virtual uint32_t getTrackDuration(trackId_t id) = 0;
 };
