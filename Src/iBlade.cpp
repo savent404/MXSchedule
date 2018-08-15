@@ -3,16 +3,12 @@
 
 void iBlade::drawBackGroundStatic()
 {
-    RGB MC;
-    parameter->getParameter("MC", MC);
     drawLine(MC, 0, getPixelNum());
 }
 
 void iBlade::drawBackGroundShade()
 {
-    RGB MC;
     float dif;
-    parameter->getParameter("MC", MC);
     parameter->getParameter("NP_Cdrift", dif);
 
     HSV hsv(MC);
@@ -158,13 +154,11 @@ void iBlade::drawTriggerSpark(step_t &step)
         return;
 
     float drit;
-    RGB mainColor;
-    parameter->getParameter("FC", mainColor);
     parameter->getParameter("NP_Cdrift", drit);
-    HSV hsv(mainColor);
+    HSV hsv(FC);
     hsv.h += drit;
     RGB difColor = hsv;
-    drawShade(mainColor, difColor, 0, getPixelNum());
+    drawShade(FC, difColor, 0, getPixelNum());
 }
 
 void iBlade::drawTriggerPartialSpark(step_t &step)
@@ -180,7 +174,7 @@ void iBlade::drawTriggerFollowVol()
 void iBlade::drawTriggerComet(step_t &step)
 {
     RGB *_p = ptr();
-    RGB mainColor, a;
+    RGB a;
 
     int length = int(getPixelNum() * BLADE_COMET_LENGTH);
     int posEnd = step.nowStep * getPixelNum() / step.totalStep;
@@ -190,19 +184,29 @@ void iBlade::drawTriggerComet(step_t &step)
     if (pos >= 0)
         _p += pos;
 
-    parameter->getParameter("FC", mainColor);
-
     for (; i < length; i++, pos++)
     {
         if (pos < 0)
             continue;
         float rate = float(i) / length;
         _p->operator*=(1 - rate);
-        a = mainColor;
+        a = FC;
         a *= rate;
         _p->operator +=(a);
         _p++;
     }
+}
+
+void iBlade::parameterUpdate()
+{
+    parameter->getParameter("NP_Cset", modeBackGround);
+    parameter->getParameter("NP_Amode", modeFilter);
+    parameter->getParameter("T_Cycle", durationFilter);
+    stepFilter.totalStep = durationFilter / BLADE_INTERVAL;
+    oldMC = MC;
+    parameter->getParameter("MC", MC);
+    parameter->getParameter("FC", FC);
+    parameter->getParameter("LC", LC);
 }
 
 void iBlade::hanlde()
@@ -225,9 +229,9 @@ void iBlade::hanlde()
     parameter->getParameter("T_Cycle", durationFilter);
     stepFilter.totalStep = durationFilter / BLADE_INTERVAL;
 
-    switch(modeBackGround)
-    {
-    case 1:
+        switch(modeBackGround)
+        {
+        case 1:
         drawBackGroundStatic();
         break;
     case 2:

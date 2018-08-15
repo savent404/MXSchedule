@@ -200,10 +200,20 @@ class iBlade : public iEvent, public iBladeDriver
 protected: // vars
     bool isActive;
     bool needClear;
-    int modeTrigger; //1~5, -1 means invalide
+    int modeBackGround;
+    int modeFilter;
+    int durationFilter;
+    int modeTrigger; //1~5, -1 means invalide, 6-triggerOut 7-triggerIn 8-ColorSwitch
     step_t stepBackGround;
     step_t stepFilter;
     step_t stepTrigger;
+
+    RGB MC;
+    RGB FC;
+    RGB LC;
+    RGB oldMC;
+    RGB RGBBlack;
+
   public:
     /**
      * @brief event
@@ -221,7 +231,11 @@ protected: // vars
         , stepBackGround(0, 2000/BLADE_INTERVAL, -1)
         , stepTrigger(0, 0, 0)
         , stepFilter(0, 0, -1)
+        , modeBackGround(1)
+        , modeFilter(1)
         , modeTrigger(-1)
+        , durationFilter(1000)
+        , RGBBlack(0, 0, 0, 255)
     {
         setEventMask(0);
         isActive = false;
@@ -237,5 +251,6 @@ public:
     void hanlde();
 
     virtual bool play(triggerID_t id);
+    void parameterUpdate();
     virtual bool abort(triggerID_t id = Unknow);
 };
