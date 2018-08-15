@@ -66,7 +66,7 @@ class iBladeDriver
      */
     void drawLine(RGB &color, int start, int end)
     {
-        RGB *_ptr = ptr();
+        RGB *_ptr = start >= 0 ? ptr() + start : ptr();
         int num = end - start;
         for (int i = 0; i < num; i++)
         {
