@@ -41,6 +41,19 @@ public:
             priority = pri;
         }
 
+        combo_t(const combo_t& other)
+        {
+            if (other.len <= 0)
+                sequence = NULL;
+            else {
+                sequence = (uint8_t*)malloc(sizeof(uint8_t)*other.len);
+                memcpy(sequence, other.sequence, sizeof(uint8_t)*other.len);
+            }
+            len = other.len;
+            id = other.id;
+            priority = other.priority;
+        }
+
         ~combo_t()
         {
             if (sequence)
@@ -69,6 +82,7 @@ protected:
      * @{ */
     std::vector<int> intParam;
     std::vector<float> floatParam;
+    std::vector<combo_t> comboParam;
     /** @} */
 
     /**
