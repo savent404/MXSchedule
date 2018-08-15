@@ -189,7 +189,6 @@ bool iParam::resetColorPos()
     colorPosBank = 0;
     return true;
 }
-
 int iParam::getBankNum() const
 {
     return numBank;

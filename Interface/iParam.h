@@ -143,7 +143,6 @@ public:
     bool incColorPos();
 
     bool resetColorPos();
-
     /**
      * @brief getBankNum
      * @return bank's number

@@ -8,6 +8,7 @@
 #define USE_QT 1
 #endif
 
+
 #if USE_QT == 1
 #define BLADE_PIXEL 256
 #define BLADE_INTERVAL 20

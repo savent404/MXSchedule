@@ -25,7 +25,6 @@ void iShechdule::run()
     const uint32_t defaultInterval = 10; // 10 ms
 
     uint16_t handEvent = 0;
-
 #if USE_QT == 1
     changeStage(StageReady);
 #else
@@ -142,7 +141,6 @@ void iShechdule::run()
                     int tIn, tColorSwitch;
                     list.param->getParameter("T_in", tIn);
                     list.param->getParameter("T_colorswitch", tColorSwitch);
-
                     if (reciveSpecificEvent(cached.message,
                                             EVENT_MODULE_ID_KEY,
                                             iKey::KEY_1_RELEASE | iKey::KEY_2_PRESS,
