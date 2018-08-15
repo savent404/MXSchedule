@@ -87,7 +87,7 @@ bool iParam::getParameter(const char* name, RGB& v) const
     if (pos < 0)
         return false;
 
-    int configIndex = staticParam.configRGBIndex.at(getBankPos());
+    int configIndex = staticParam.configRGBIndex.at((getBankPos() + colorPosBank) % getBankNum());
 
     if (configIndex >= getBankNum()) {
         return false;
@@ -106,7 +106,7 @@ bool iParam::setParameter(const char* name, const int& v)
         if (!matchBankn(name, bankID) || bankID > getBankNum()) {
             return false;
         }
-        staticParam.configRGBIndex.at(bankID - 1) = v;
+        staticParam.configRGBIndex.at(bankID - 1) = v - 1;
         return true;
     }
     intParam.at(pos) = v;
@@ -129,7 +129,7 @@ bool iParam::setParameter(const char* name, const RGB& v)
     int pos = getArrayIndex(typeRGBParam, name, configNum);
     if (pos < 0)
         return false;
-    int configIndex = staticParam.configRGBIndex.at(getBankPos());
+    int configIndex = staticParam.configRGBIndex.at((getBankPos() + colorPosBank) % getBankNum());
     if (size_t(configIndex) >= staticParam.configRGB.size()) {
         return false;
     }
@@ -178,6 +178,17 @@ bool iParam::switchBank(int pos)
     return true;
 }
 
+bool iParam::incColorPos()
+{
+    colorPosBank++;
+    return true;
+}
+
+bool iParam::resetColorPos()
+{
+    colorPosBank = 0;
+    return true;
+}
 int iParam::getBankNum() const
 {
     return numBank;
@@ -196,4 +207,9 @@ string iParam::getBankName() const
 int iParam::getTriggerNum(triggerID_t id) const
 {
     return triggerNum[id];
+}
+
+string iParam::getPrefixPath() const
+{
+    return workPath;
 }

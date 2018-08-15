@@ -6,7 +6,7 @@ iPower::iPower(float level1, float level2)
         , L2(level2)
         , now(4.2f)
 {
-    setEventMask(event_level1 | event_level2);
+    setEventMask(event_level1 | event_level2 | event_plugin | event_plugout);
 }
 
 iPower::~iPower()

@@ -8,6 +8,21 @@
 #define USE_QT 1
 #endif
 
+
+#if USE_QT == 1
+#define BLADE_PIXEL 256
+#define BLADE_INTERVAL 20
+#endif
+
+#ifndef BLADE_PIXEL
+#define BLADE_PIXEL 96
+#endif
+
+#ifndef BLADE_INTERVAL
+#define BLADE_INTERVAL 20
+#endif
+
+
 /** @brief  trigger id */
 typedef enum {
     Unknow = -1,
@@ -28,7 +43,7 @@ typedef enum {
 extern const std::string typeIntParam[44];
 extern const std::string typeFloatParam[6];
 extern const std::string typeRGBParam[3];
-extern const std::string triggerName[11];
+extern const std::string triggerName[12];
 
 /**
  * @brief triggerName2ID convert string to triggerID_t

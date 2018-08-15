@@ -23,6 +23,7 @@ protected:
      * @{ */
     /** Bank position now */
     int posBank;
+    int colorPosBank;
     /** Bank's total number */
     int numBank;
     /** Bank's path or name*/
@@ -94,6 +95,7 @@ public:
     iParam(int bank = 0)
         : iEvent(EVENT_MODULE_ID_PARAM)
         , posBank(bank)
+        , colorPosBank(0)
         , numBank(0)
         , inited(false)
     {
@@ -138,6 +140,9 @@ public:
      */
     bool switchBank(int pos = -1);
 
+    bool incColorPos();
+
+    bool resetColorPos();
     /**
      * @brief getBankNum
      * @return bank's number
@@ -155,6 +160,12 @@ public:
      * @return bank's name
      */
     std::string getBankName() const;
+
+    /**
+     * @brief get Bank's prefix path
+     * @return string
+     */
+    std::string getPrefixPath() const;
 
     /**
      * @brief getTriggerNum

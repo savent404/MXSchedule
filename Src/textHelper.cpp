@@ -5,7 +5,7 @@ bool matchKeyValue(const char* input, std::__cxx11::string& key, int& v)
 
     char nameBuffer[32];
     int vv;
-    if (re_match("\\w+=\\d+[^,.]*$", input) == -1)
+    if (re_match("\\w+=-?\\d+[^,.]*$", input) == -1)
         return false;
     sscanf(input, "%[^=]S", &nameBuffer[0]);
     sscanf(input, "%*[^=]=%d", &vv);
@@ -64,7 +64,7 @@ bool matchKeyValue(const char* input, string& key, float& v)
 
     char nameBuffer[32];
     float vv;
-    if (re_match("\\w+=\\d+.\\d+[^,]*$", input) == -1)
+    if (re_match("\\w+=-?\\d+.\\d+[^,]*$", input) == -1)
         return false;
     sscanf(input, "%[^=]s", nameBuffer);
     sscanf(input, "%*[^=]=%f", &vv);
@@ -90,7 +90,8 @@ bool matchKeyValue(const char* input, string& key, RGB& v)
     v.R = uint8_t(vBuffer[0]);
     v.G = uint8_t(vBuffer[1]);
     v.B = uint8_t(vBuffer[2]);
-    v.W = uint8_t(vBuffer[3]);
+    v.W = 255;
+//    v.W = uint8_t(vBuffer[3]);
     key = nameBuffer;
     return true;
 }
