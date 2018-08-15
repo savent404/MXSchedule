@@ -18,6 +18,38 @@ public:
         crash = 0x01,
     } event_t;
 
+    /**
+     * @brief The combo_t struct
+     * @details storage Combo's msg: priority, id and sequence
+     */
+    struct combo_t {
+        int id;
+        int priority;
+        int len;
+        uint8_t* sequence;
+
+        combo_t(int length, int pri = 1, int playId = 1)
+        {
+            if (length <= 0)
+                sequence = NULL;
+            else {
+                sequence = (uint8_t*)malloc(sizeof(uint8_t)*length);
+                memset(sequence, 0, length * sizeof(uint8_t));
+            }
+            len = length;
+            id = playId;
+            priority = pri;
+        }
+
+        ~combo_t()
+        {
+            if (sequence)
+            {
+                free(sequence);
+            }
+        }
+    };
+
 protected:
     /** @name bank related parameter
      * @{ */
