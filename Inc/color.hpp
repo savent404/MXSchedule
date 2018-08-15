@@ -36,6 +36,7 @@ class RGB
         W = r.W + offset_w;
     }
     RGB &operator=(const RGB &other)
+
     {
         if (&other == this)
             return *this;
