@@ -45,6 +45,16 @@ bool matchBankn(const char* input, int& bankIndex);
 bool matchCFGn(const char* input, int& configIndex);
 
 /**
+ * @brief matchComboN match combo(%d)=ssccs-(%d)
+ * @param[in] input
+ * @param[out] comboIndex  combo1->Index=1, when play audio, it's must be 'combo1.wav'
+ * @param[out] sequence "sssccc", support 's' 'c' 'b', use strlen can get sequence's length
+ * @param[out] priority -(%d), it can be 1-4
+ * @return if matched
+ */
+bool matchComboN(const char* input, int& comboIndex, char* sequence, int& priority);
+
+/**
  * @name regex functions
  * @param[in] input
  * @param[out] key
