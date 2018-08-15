@@ -219,4 +219,11 @@ public:
      * @return number
      */
     int getTriggerNum(triggerID_t id) const;
+
+    /**
+     * @brief comboList
+     * @return combo's array
+     * @note It's a const method, and return const array
+     */
+    const vector<combo_t> *comboList() const;
 };
