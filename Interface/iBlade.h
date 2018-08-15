@@ -249,8 +249,7 @@ protected: // vars
 
 public:
     void hanlde();
-
-    virtual bool play(triggerID_t id);
     void parameterUpdate();
+    virtual bool play(triggerID_t id, uint32_t audioDuration = 0);
     virtual bool abort(triggerID_t id = Unknow);
 };

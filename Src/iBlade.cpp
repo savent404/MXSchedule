@@ -215,39 +215,35 @@ void iBlade::hanlde()
     {
         RGB a;
         needClear = false;
-        drawLine(a, 0, 255);
+        drawLine(a, 0, getPixelNum());
     }
     if (isActive == false)
         return;
 
-    int modeBackGround;
-    int modeFilter;
-    int durationFilter;
-
-    parameter->getParameter("NP_Cset", modeBackGround);
-    parameter->getParameter("NP_Amode", modeFilter);
-    parameter->getParameter("T_Cycle", durationFilter);
-    stepFilter.totalStep = durationFilter / BLADE_INTERVAL;
-
+    // modeTrigger >= 6 no needs to run BackGround draw
+    if (modeTrigger < 6) {
         switch(modeBackGround)
         {
         case 1:
-        drawBackGroundStatic();
-        break;
-    case 2:
-        drawBackGroundShade();
-        break;
-    case 3:
-        drawBackGroundStaticRainbow();
-        break;
-    case 4:
-        drawBackGroundDynamicRainbow(stepBackGround);
-        break;
-    case 5:
-        drawBackGroundFlame();
-        break;
+            drawBackGroundStatic();
+            break;
+        case 2:
+            drawBackGroundShade();
+            break;
+        case 3:
+            drawBackGroundStaticRainbow();
+            break;
+        case 4:
+            drawBackGroundDynamicRainbow(stepBackGround);
+            break;
+        case 5:
+            drawBackGroundFlame();
+            break;
+        }
     }
-
+    // in case x/totalStep has div-0 error
+    if (stepTrigger.totalStep <= 0)
+        stepTrigger.totalStep = 1;
     switch(modeTrigger)
     {
     case -1:
@@ -266,6 +262,19 @@ void iBlade::hanlde()
         break;
     case 5:
         drawTriggerComet(stepTrigger);
+        break;
+    case 6:
+        drawLine(MC, 0, stepTrigger.nowStep * getPixelNum() / stepTrigger.totalStep);
+        break;
+    case 7:
+        drawLine(RGBBlack
+                 , (stepTrigger.totalStep - stepTrigger.nowStep)
+                   *getPixelNum() / stepTrigger.totalStep
+                 , getPixelNum());
+        break;
+    case 8:
+        int p = stepTrigger.nowStep * getPixelNum() / stepTrigger.totalStep;
+        drawShade(MC, oldMC, p - int(BLADE_COMET_LENGTH * getPixelNum()), p);
         break;
     }
     switch(modeFilter)
@@ -294,15 +303,177 @@ void iBlade::hanlde()
     stepFilter.walk();
 
     // if return true, end trigger
-    if (stepTrigger.walk()) {
+    if (modeTrigger > 0 && stepTrigger.walk()) {
+        // Trigger In
+        if (modeTrigger == 7) {
+            isActive = false;
+            needClear = true;
+        }
         modeTrigger = -1;
         sendEvent(event_end);
     }
 }
 
-bool iBlade::play(triggerID_t id)
+bool iBlade::play(triggerID_t id, uint32_t duration)
 {
-    id = id;
+    int mode;
+    switch (id)
+    {
+    case Swing:
+        parameter->getParameter("NP_SwingMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case Slash:
+        parameter->getParameter("NP_SlashMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case Spin:
+        parameter->getParameter("NP_SpinMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case Stab:
+        parameter->getParameter("NP_StabMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case Clash:
+        parameter->getParameter("NP_ClashMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case Blaster:
+        parameter->getParameter("NP_BlasterMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case Force:
+        parameter->getParameter("NP_ForceMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case Lockup:
+        parameter->getParameter("NP_LockupMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case Combo:
+        parameter->getParameter("NP_ComboMode", mode);
+        parameter->getParameter("Sparkcount", stepTrigger.repeatCnt);
+        stepTrigger.repeatCnt -= 1;
+        if (mode == 5)
+            parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        else if (mode == 4)
+            stepTrigger.totalStep = duration;
+        else
+            parameter->getParameter("T_Spark", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = mode;
+        break;
+    case In: {
+        parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        stepTrigger.repeatCnt = 0;
+        modeTrigger = 7;
+        break;
+    }
+    case Out : {
+        parameterUpdate();
+        parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        stepTrigger.totalStep /= BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        stepTrigger.repeatCnt = 0;
+        modeTrigger = 6;
+        isActive = true;
+        needClear = true;
+        break;
+    }
+    case ColorSwitch:
+        parameterUpdate();
+        // Fixed white Comet, fixed duration
+        stepTrigger.repeatCnt = 0;
+        stepTrigger.totalStep = 600 / BLADE_INTERVAL;
+        stepTrigger.nowStep = 0;
+        modeTrigger = 8;
+        break;
+    }
     sendEvent(event_start);
     return true;
 }
