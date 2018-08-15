@@ -9,6 +9,32 @@
 #include "iPower.h"
 #include "iHand.h"
 
+class triggerTimeLocker
+{
+    uint32_t lastTime;
+    uint32_t lockTime;
+public:
+    triggerTimeLocker(uint32_t lockTime = 0) {
+        lastTime = 0;
+    }
+
+    bool acquire()
+    {
+        uint32_t stamp = mGetCPUTime();
+        if (stamp >= lastTime)
+        {
+            lastTime = stamp + lockTime;
+            return true;
+        }
+        return false;
+    }
+
+    void setLock(uint32_t time)
+    {
+        lockTime = time;
+    }
+};
+
 typedef struct iDriverList {
     iAudio* audio;
     iParam* param;
@@ -43,9 +69,11 @@ protected:
 
     stage_t stage;
     bool lockUpHoldOn;
+    triggerTimeLocker lockTrigger[12];
     void errorHandle(uint32_t message);
     bool reciveSpecificEvent(uint32_t& message, uint16_t moduleID, uint16_t event, uint32_t timeout);
     void handlePowerManageEvent(uint16_t event);
+    void parameterUpdate();
 public:
     iShechdule(iDriverList l);
     virtual ~iShechdule();

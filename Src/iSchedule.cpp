@@ -7,6 +7,7 @@ iShechdule::iShechdule(iDriverList l)
 {
     list.key->setEventMask(iKey::KEY_1_PRESS | iKey::KEY_1_RELEASE |
         iKey::KEY_2_PRESS | iKey::KEY_2_RELEASE);
+    parameterUpdate();
 }
 
 iShechdule::~iShechdule()
@@ -92,6 +93,7 @@ void iShechdule::run()
                                             tBankSwitch))
                     {
                         list.param->switchBank();
+                        parameterUpdate();
                         mDebug(DEBUG_LEVEL_INFO,
                                "Bank Switch:%d/%d:%s",
                                list.param->getBankPos() + 1,
@@ -271,6 +273,31 @@ void iShechdule::handlePowerManageEvent(uint16_t event)
     }
 }
 
+void iShechdule::parameterUpdate()
+{
+    int aInt;
+    if (list.param->getParameter("T_SwingFreeze", aInt))
+        lockTrigger[Swing].setLock(aInt);
+    else
+        lockTrigger[Swing].setLock(0);
+    if (list.param->getParameter("T_SpinFreeze", aInt))
+        lockTrigger[Spin].setLock(aInt);
+    else
+        lockTrigger[Spin].setLock(0);
+    if (list.param->getParameter("T_StabFreeze", aInt))
+        lockTrigger[Stab].setLock(aInt);
+    else
+        lockTrigger[Stab].setLock(0);
+    if (list.param->getParameter("T_ClashFreeze", aInt))
+        lockTrigger[Clash].setLock(aInt);
+    else
+        lockTrigger[Clash].setLock(0);
+    if (list.param->getParameter("T_BlasterFreeze", aInt))
+        lockTrigger[Blaster].setLock(aInt);
+    else
+        lockTrigger[Blaster].setLock(0);
+}
+
 void iShechdule::errorHandle(uint32_t message)
 {
     cached.moduleID = iEvent::getModuleID(message);
@@ -358,13 +385,18 @@ void iShechdule::changeStage(stage_t newStage)
 
 void iShechdule::playTrigger(triggerID_t id)
 {
+    if (lockTrigger[id].acquire() == false)
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "trigger(%d) not triggered cause of time lock",
+               id);
+        return;
+    }
     switch (id)
     {
     case ColorSwitch:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:ColorSwitch");
         list.param->incColorPos();
-        list.blade->parameterUpdate();
         trackIdTrigger = list.audio->play(id);
         list.blade->play(id);
         break;
