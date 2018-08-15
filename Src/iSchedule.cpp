@@ -325,9 +325,9 @@ void iShechdule::parameterUpdate()
 
 iShechdule::triggerType_t iShechdule::classifyTriggerType(triggerID_t id)
 {
-    if (id == Swing || id == Spin)
+    if (id == Swing || id == Spin || id == Slash)
         return triggerType_1;
-    else if (id == Stab || id == Clash || id == Slash)
+    else if (id == Stab || id == Clash)
         return triggerType_2;
     else if (id == Blaster || id == Force || id == Lockup)
         return triggerType_3;
