@@ -239,6 +239,8 @@ void iBlade::hanlde()
         case 5:
             drawBackGroundFlame();
             break;
+        default:
+            mDebug(DEBUG_LEVEL_INFO, "Unknow back ground mode:%d", modeBackGround);
         }
     }
     // in case x/totalStep has div-0 error
@@ -272,10 +274,13 @@ void iBlade::hanlde()
                    *getPixelNum() / stepTrigger.totalStep
                  , getPixelNum());
         break;
-    case 8:
+    case 8: {
         int p = stepTrigger.nowStep * getPixelNum() / stepTrigger.totalStep;
         drawShade(MC, oldMC, p - int(BLADE_COMET_LENGTH * getPixelNum()), p);
         break;
+    }
+    default:
+        mDebug(DEBUG_LEVEL_INFO, "Unknow Trigger Mode:%d", modeTrigger);
     }
     switch(modeFilter)
     {
@@ -297,6 +302,8 @@ void iBlade::hanlde()
     case 6:
         drawFilterVolFollow();
         break;
+    default:
+        mDebug(DEBUG_LEVEL_INFO, "Unknow Filter mode:%d", modeFilter);
     }
 
     stepBackGround.walk();
@@ -316,7 +323,7 @@ void iBlade::hanlde()
 
 bool iBlade::play(triggerID_t id, uint32_t duration)
 {
-    int mode;
+    int mode = 0;
     switch (id)
     {
     case Swing:
