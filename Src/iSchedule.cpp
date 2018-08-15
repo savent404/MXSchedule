@@ -3,10 +3,16 @@
 using namespace std;
 
 iShechdule::iShechdule(iDriverList l)
-    : list(l), stage(StageInit), lockUpHoldOn(false), trackIdTrigger(-1)
+    : list(l)
+    , stage(StageInit)
+    , lockUpHoldOn(false)
+    , trackIdTrigger(-1)
+    , idPlayingTrigger(Unknow)
+
 {
     list.key->setEventMask(iKey::KEY_1_PRESS | iKey::KEY_1_RELEASE |
         iKey::KEY_2_PRESS | iKey::KEY_2_RELEASE);
+    list.blade->setEventMask(iBlade::event_end);
     parameterUpdate();
 }
 
@@ -49,7 +55,14 @@ void iShechdule::run()
 
         if (cached.moduleID == EVENT_MODULE_ID_POWER)
             handlePowerManageEvent(cached.event);
-
+        // response Blade event
+        if (cached.moduleID == EVENT_MODULE_ID_BLADE)
+        {
+            if (cached.event & (iBlade::event_end))
+            {
+                idPlayingTrigger = Unknow;
+            }
+        }
         // response Key board event
         if (cached.moduleID == EVENT_MODULE_ID_KEY &&
                 cached.event & (iKey::KEY_1_PRESS | iKey::KEY_2_PRESS))
@@ -298,6 +311,17 @@ void iShechdule::parameterUpdate()
         lockTrigger[Blaster].setLock(0);
 }
 
+iShechdule::triggerType_t iShechdule::classifyTriggerType(triggerID_t id)
+{
+    if (id == Swing || id == Spin)
+        return triggerType_1;
+    else if (id == Stab || id == Clash)
+        return triggerType_2;
+    else if (id == Blaster || id == Force || id == Lockup)
+        return triggerType_3;
+    return triggerType_other;
+}
+
 void iShechdule::errorHandle(uint32_t message)
 {
     cached.moduleID = iEvent::getModuleID(message);
@@ -385,6 +409,30 @@ void iShechdule::changeStage(stage_t newStage)
 
 void iShechdule::playTrigger(triggerID_t id)
 {
+    // chekc if can interrupt
+    if (idPlayingTrigger != Unknow)
+    {
+        triggerType_t newTriggerType = classifyTriggerType(id);
+        triggerType_t oldTriggerType = classifyTriggerType(idPlayingTrigger);
+        if (oldTriggerType >= newTriggerType)
+        {
+            mDebug(DEBUG_LEVEL_VERBOSS,
+                   "new Trigger(%d) cant interrupt old trigger(%d)",
+                   id, idPlayingTrigger);
+            return;
+        }
+        list.blade->abort();
+        reciveSpecificEvent(cached.message,
+                            EVENT_MODULE_ID_BLADE,
+                            iBlade::event_end,
+                            10);
+        list.audio->abort(trackIdTrigger);
+        reciveSpecificEvent(cached.message,
+                            EVENT_MODULE_ID_AUDIO,
+                            iAudio::end,
+                            10);
+    }
+    idPlayingTrigger = id;
     if (lockTrigger[id].acquire() == false)
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "trigger(%d) not triggered cause of time lock",
