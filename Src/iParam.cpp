@@ -87,7 +87,7 @@ bool iParam::getParameter(const char* name, RGB& v) const
     if (pos < 0)
         return false;
 
-    int configIndex = staticParam.configRGBIndex.at(getBankPos());
+    int configIndex = staticParam.configRGBIndex.at((getBankPos() + colorPosBank) % getBankNum());
 
     if (configIndex >= getBankNum()) {
         return false;
@@ -129,7 +129,7 @@ bool iParam::setParameter(const char* name, const RGB& v)
     int pos = getArrayIndex(typeRGBParam, name, configNum);
     if (pos < 0)
         return false;
-    int configIndex = staticParam.configRGBIndex.at(getBankPos());
+    int configIndex = staticParam.configRGBIndex.at((getBankPos() + colorPosBank) % getBankNum());
     if (size_t(configIndex) >= staticParam.configRGB.size()) {
         return false;
     }
@@ -175,6 +175,18 @@ bool iParam::switchBank(int pos)
     v += "Effect.txt";
     readConfigFromFile(v.c_str());
 
+    return true;
+}
+
+bool iParam::incColorPos()
+{
+    colorPosBank++;
+    return true;
+}
+
+bool iParam::resetColorPos()
+{
+    colorPosBank = 0;
     return true;
 }
 

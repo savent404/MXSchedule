@@ -363,6 +363,8 @@ void iShechdule::playTrigger(triggerID_t id)
     case ColorSwitch:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:ColorSwitch");
+        list.param->incColorPos();
+        list.blade->parameterUpdate();
         trackIdTrigger = list.audio->play(id);
         list.blade->play(id);
         break;
@@ -398,6 +400,8 @@ void iShechdule::playTrigger(triggerID_t id)
     case In:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:In");
+        // if not call list.bale->parameterUpdate(), Color remains
+        list.param->resetColorPos();
         trackIdTrigger = list.audio->play(id);
         list.audio->mainTrack(false);
         list.blade->play(id);
