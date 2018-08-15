@@ -55,6 +55,20 @@ void iShechdule::run()
 
         if (cached.moduleID == EVENT_MODULE_ID_POWER)
             handlePowerManageEvent(cached.event);
+        // response Hand event
+        if (StageRunning == stage && cached.moduleID == EVENT_MODULE_ID_HAND)
+        {
+            if (cached.event & iHand::handSwing)
+                playTrigger(Swing);
+            if (cached.event & iHand::handClash)
+                playTrigger(Clash);
+            if (cached.event & iHand::handSlash)
+                playTrigger(Slash);
+            if (cached.event & iHand::handSpin)
+                playTrigger(Spin);
+            if (cached.event & iHand::handStab)
+                playTrigger(Stab);
+        }
         // response Blade event
         if (cached.moduleID == EVENT_MODULE_ID_BLADE)
         {
@@ -487,8 +501,44 @@ void iShechdule::playTrigger(triggerID_t id)
         list.blade->play(id);
         break;
     }
+    case Swing:
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "T:Swing");
+        trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
+        break;
+    }
+    case Stab:
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "T:Stab");
+        trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
+        break;
+    }
+    case Spin:
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "T:Spin");
+        trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
+        break;
+    }
+    case Slash:
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "T:Slash");
+        trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
+        break;
+    }
+    case Clash:
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "T:Clash");
+        trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
+        break;
+    }
     default:
     {
+        mDebug(DEBUG_LEVEL_ERROR, "Unknow trigger:%d", id);
         break;
     }
     }
