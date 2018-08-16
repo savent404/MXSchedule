@@ -10,6 +10,9 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief 用户参数管理
+ */
 class iParam : public iEvent {
 
 public:
@@ -136,6 +139,9 @@ protected:
     void setDefaultParameter();
 
 public:
+    /**
+     * @brief 标记初始化是否完成
+     */
     bool inited;
 
     iParam(int bank = 0)
@@ -186,9 +192,16 @@ public:
      */
     bool switchBank(int pos = -1);
 
+    /**
+     * @brief colorSwitch更新颜色参数的index
+     */
     bool incColorPos();
 
+    /**
+     * @brief 清除ColorSwitch造成的bank颜色不符
+     */
     bool resetColorPos();
+
     /**
      * @brief getBankNum
      * @return bank's number
