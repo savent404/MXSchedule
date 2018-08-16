@@ -8,6 +8,7 @@
 #include "iParam.h"
 #include "iPower.h"
 #include "iHand.h"
+#include <vector>
 
 class triggerTimeLocker
 {
@@ -56,10 +57,11 @@ public:
     } stage_t;
 
     typedef enum triggerType_t {
-       triggerType_1 = 0,
-       triggerType_2 = 1,
-       triggerType_3 = 2,
-       triggerType_other = 3,
+        /** Combo's trigger level range is [1...4] */
+       triggerType_1 = 2,
+       triggerType_2 = 3,
+       triggerType_3 = 4,
+       triggerType_other = 5,
     } triggerType_t;
 
 private:
@@ -82,7 +84,9 @@ protected:
     bool lockUpHoldOn;
     triggerTimeLocker lockTrigger[12];
     triggerID_t idPlayingTrigger;
-
+    std::vector<uint8_t> comboQueue;
+    uint32_t comboLastTime;
+    int comboIndex;
     void errorHandle(uint32_t message);
     bool reciveSpecificEvent(uint32_t& message, uint16_t moduleID, uint16_t event, uint32_t timeout);
     void handlePowerManageEvent(uint16_t event);
@@ -94,6 +98,11 @@ protected:
      * @return trigger's type(interrupt level)
      */
     triggerType_t classifyTriggerType(triggerID_t id);
+    /**
+     * @brief handleCombo
+     * @param id if trigger a combo
+     */
+    bool handleCombo(triggerID_t id);
 public:
     iShechdule(iDriverList l);
     virtual ~iShechdule();
@@ -101,5 +110,5 @@ public:
     void run();
 
     void changeStage(stage_t newStage);
-    void playTrigger(triggerID_t id);
+    bool playTrigger(triggerID_t id);
 };

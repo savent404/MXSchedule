@@ -8,6 +8,7 @@ iShechdule::iShechdule(iDriverList l)
     , lockUpHoldOn(false)
     , trackIdTrigger(-1)
     , idPlayingTrigger(Unknow)
+    , comboLastTime(0)
 
 {
     list.key->setEventMask(iKey::KEY_1_PRESS | iKey::KEY_1_RELEASE |
@@ -321,6 +322,13 @@ void iShechdule::parameterUpdate()
         lockTrigger[Blaster].setLock(aInt);
     else
         lockTrigger[Blaster].setLock(0);
+    lockTrigger[Combo].setLock(0);
+    lockTrigger[Out].setLock(0);
+    lockTrigger[In].setLock(0);
+    lockTrigger[ColorSwitch].setLock(0);
+    lockTrigger[Lockup].setLock(0);
+    lockTrigger[Force].setLock(0);
+    lockTrigger[Blaster].setLock(0);
 }
 
 iShechdule::triggerType_t iShechdule::classifyTriggerType(triggerID_t id)
@@ -329,9 +337,56 @@ iShechdule::triggerType_t iShechdule::classifyTriggerType(triggerID_t id)
         return triggerType_1;
     else if (id == Stab || id == Clash)
         return triggerType_2;
-    else if (id == Blaster || id == Force || id == Lockup)
+    else if (id == Blaster || id == Force)
         return triggerType_3;
     return triggerType_other;
+}
+
+bool iShechdule::handleCombo(triggerID_t id)
+{
+
+    // storage tirggerType
+    uint8_t tTrigger = classifyTriggerType(id) - 2;
+    int combo_T;
+    list.param->getParameter("T_combo", combo_T);
+    if (comboLastTime <= mGetCPUTime())
+    {
+        comboQueue.clear();
+    }
+    comboQueue.push_back(tTrigger);
+    comboLastTime = mGetCPUTime() + combo_T;
+    // check if match any combo sequence
+    const vector<iParam::combo_t>* l = list.param->comboList();
+    int comboMaxLen = 0;
+    for (size_t i = 0; i < l->size(); i++)
+    {
+        bool isSame = true;
+        if (comboMaxLen < l->at(i).len)
+            comboMaxLen = l->at(i).len;
+        if (l->at(i).len > comboQueue.size())
+            continue;
+        for (size_t j = 0; j < l->at(i).len; j++)
+        {
+            if (l->at(i).sequence[j] != comboQueue[j + comboQueue.size() - l->at(i).len])
+            {
+                comboIndex = int(i);
+                isSame = false;
+                break;
+            }
+        }
+        if (isSame)
+        {
+            comboQueue.clear();
+            return true;
+        }
+    }
+    if (comboMaxLen < comboQueue.size())
+    {
+        comboQueue.erase(comboQueue.begin(),
+                         comboQueue.begin() + comboQueue.size() - comboMaxLen);
+        mDebug(DEBUG_LEVEL_VERBOSS, "Left comboQueue Size:%ud", comboQueue.size());
+    }
+    return false;
 }
 
 void iShechdule::errorHandle(uint32_t message)
@@ -419,19 +474,27 @@ void iShechdule::changeStage(stage_t newStage)
     }
 }
 
-void iShechdule::playTrigger(triggerID_t id)
+bool iShechdule::playTrigger(triggerID_t id)
 {
+    if (lockTrigger[id].acquire() == false)
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "trigger(%d) not triggered cause of time lock",
+               id);
+        return false;
+    }
     // chekc if can interrupt
     if (idPlayingTrigger != Unknow)
     {
-        triggerType_t newTriggerType = classifyTriggerType(id);
+        triggerType_t newTriggerType = id == Combo
+                ? triggerType_t(list.param->comboList()->at(comboIndex).priority)
+                : classifyTriggerType(id);
         triggerType_t oldTriggerType = classifyTriggerType(idPlayingTrigger);
         if (oldTriggerType >= newTriggerType)
         {
             mDebug(DEBUG_LEVEL_VERBOSS,
                    "new Trigger(%d) cant interrupt old trigger(%d)",
                    id, idPlayingTrigger);
-            return;
+            return false;
         }
         list.blade->abort();
         reciveSpecificEvent(cached.message,
@@ -444,13 +507,14 @@ void iShechdule::playTrigger(triggerID_t id)
                             iAudio::end,
                             10);
     }
-    idPlayingTrigger = id;
-    if (lockTrigger[id].acquire() == false)
-    {
-        mDebug(DEBUG_LEVEL_VERBOSS, "trigger(%d) not triggered cause of time lock",
-               id);
-        return;
+
+    if (handleCombo(id)) {
+        if (playTrigger(Combo) == true)
+            return true;
     }
+
+    idPlayingTrigger = id;
+
     switch (id)
     {
     case ColorSwitch:
@@ -530,6 +594,13 @@ void iShechdule::playTrigger(triggerID_t id)
     case Clash:
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Clash");
+        trackIdTrigger = list.audio->play(id);
+        list.blade->play(id);
+        break;
+    }
+    case Combo:
+    {
+        mDebug(DEBUG_LEVEL_VERBOSS, "T:Combo");
         trackIdTrigger = list.audio->play(id);
         list.blade->play(id);
         break;
