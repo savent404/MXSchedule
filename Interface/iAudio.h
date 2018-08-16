@@ -76,10 +76,11 @@ public:
     /**
      * @brief play
      * @param id
+     * @param comboIndex if triggerd a combo,should give index
      * @note  this mothod would call iAudio::_play
      * @return trigger's track id
      */
-    trackId_t play(triggerID_t id);
+    trackId_t play(triggerID_t id, int comboIndex = -1);
 
     /**
      * @brief mainTrack enable/disable background audio

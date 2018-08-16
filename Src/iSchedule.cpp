@@ -602,7 +602,7 @@ bool iShechdule::playTrigger(triggerID_t id)
     {
         mDebug(DEBUG_LEVEL_VERBOSS, "T:Combo");
         trackIdTrigger = list.audio->play(id);
-        list.blade->play(id);
+        list.blade->play(id, comboIndex);
         break;
     }
     default:
