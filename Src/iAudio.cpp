@@ -2,7 +2,7 @@
 
 using namespace std;
 
-iAudio::trackId_t iAudio::play(triggerID_t id)
+iAudio::trackId_t iAudio::play(triggerID_t id, int comboIndex)
 {
     string filePath;
     string dirPath;
@@ -10,6 +10,13 @@ iAudio::trackId_t iAudio::play(triggerID_t id)
     {
         dirPath = parameter->getPrefixPath() + "System/";
         filePath = "ColorSwitch.wav";
+    }
+    else if (Combo == id)
+    {
+        dirPath = parameter->getBankName();
+        filePath = "combo";
+        filePath += comboIndex;
+        filePath += ".wav";
     }
     else if (Unknow == id)
     {

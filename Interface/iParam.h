@@ -10,6 +10,9 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief 用户参数管理
+ */
 class iParam : public iEvent {
 
 public:
@@ -17,6 +20,51 @@ public:
     typedef enum {
         crash = 0x01,
     } event_t;
+
+    /**
+     * @brief The combo_t struct
+     * @details storage Combo's msg: priority, id and sequence
+     */
+    struct combo_t {
+        int id;
+        int priority;
+        int len;
+        uint8_t* sequence;
+
+        combo_t(int length, int pri = 1, int playId = 1)
+        {
+            if (length <= 0)
+                sequence = NULL;
+            else {
+                sequence = (uint8_t*)malloc(sizeof(uint8_t)*length);
+                memset(sequence, 0, length * sizeof(uint8_t));
+            }
+            len = length;
+            id = playId;
+            priority = pri;
+        }
+
+        combo_t(const combo_t& other)
+        {
+            if (other.len <= 0)
+                sequence = NULL;
+            else {
+                sequence = (uint8_t*)malloc(sizeof(uint8_t)*other.len);
+                memcpy(sequence, other.sequence, sizeof(uint8_t)*other.len);
+            }
+            len = other.len;
+            id = other.id;
+            priority = other.priority;
+        }
+
+        ~combo_t()
+        {
+            if (sequence)
+            {
+                free(sequence);
+            }
+        }
+    };
 
 protected:
     /** @name bank related parameter
@@ -37,6 +85,7 @@ protected:
      * @{ */
     std::vector<int> intParam;
     std::vector<float> floatParam;
+    std::vector<combo_t> comboParam;
     /** @} */
 
     /**
@@ -90,6 +139,9 @@ protected:
     void setDefaultParameter();
 
 public:
+    /**
+     * @brief 标记初始化是否完成
+     */
     bool inited;
 
     iParam(int bank = 0)
@@ -140,9 +192,16 @@ public:
      */
     bool switchBank(int pos = -1);
 
+    /**
+     * @brief colorSwitch更新颜色参数的index
+     */
     bool incColorPos();
 
+    /**
+     * @brief 清除ColorSwitch造成的bank颜色不符
+     */
     bool resetColorPos();
+
     /**
      * @brief getBankNum
      * @return bank's number
@@ -173,4 +232,11 @@ public:
      * @return number
      */
     int getTriggerNum(triggerID_t id) const;
+
+    /**
+     * @brief comboList
+     * @return combo's array
+     * @note It's a const method, and return const array
+     */
+    const vector<combo_t> *comboList() const;
 };

@@ -30,7 +30,19 @@
 #define EVENT_MODULE_ID_HAND (1 << 6)
 #endif
 
+/**
+ * @brief 外部声明的消息发送函数
+ * @param message 包含了高16位的moduleID以及低16位的事件
+ * @note 需要实现多进程间的事件传递
+ */
 extern void defaultEventSender(uint32_t message);
+
+/**
+ * @brief 外部声明的消息接收函数
+ * @param[out] message 接收到的message
+ * @param[in] timeout default:100ms
+ * @return if recived a message, return false if timeout
+ */
 extern bool defaultEventReciver(uint32_t& message, uint32_t timeout = 100);
 
 /**
