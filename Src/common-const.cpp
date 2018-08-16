@@ -40,8 +40,9 @@
  *  - T_Force
  *  - T_Lockup
  *  - T_LockupHold
+ *  - T_Combo
  */
-const std::string typeIntParam[44] = {
+const std::string typeIntParam[45] = {
     // SETTING.txt
     "Mode",
     "SystemVol",
@@ -94,6 +95,7 @@ const std::string typeIntParam[44] = {
     "NP_ForceMode",
     "NP_LockupMode",
     "NP_ComboMode",
+    "T_Combo",
 
 };
 
