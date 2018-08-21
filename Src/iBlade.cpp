@@ -135,7 +135,28 @@ void iBlade::drawFilterSpark()
 
 void iBlade::drawFilterRain()
 {
-
+    float rate = 0.0f;
+    parameter->getParameter("NP_Density", rate);
+    int loopCnt = rand() % 100 > rate ? 0 : 1;
+    int ans;
+    RGB* _p = ptr();
+    for (int i = 0; i < loopCnt; i++)
+    {
+        int pos = rand() % getPixelNum();
+        (_p + pos)->W = 0;
+    }
+    for (int i = 1; i < getPixelNum(); i++)
+    {
+        if (i) {
+            ans = _p[i - 1].W + _p[i].W + _p[i + 1].W + 2;
+            ans /= 3;
+            _p[i].W = ans > 255 ? 255 : ans;
+        } else {
+            ans = _p[i].W + _p[i + 1].W + 2;
+            ans /= 2;
+            _p[i].W = ans > 255 ? 255 : ans;
+        }
+    }
 }
 
 void iBlade::drawFilterVolFollow()
