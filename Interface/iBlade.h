@@ -143,6 +143,55 @@ public: // API
     virtual void update() = 0;
 };
 
+
+/**
+ * @brief Flame effect
+ */
+class Flame {
+    RGB vector[256];
+    uint8_t index[BLADE_PIXEL];
+public:
+    Flame()
+    {
+        memset(index, 0, sizeof(index));
+        index[0] = 255;
+        for (int i = 0; i < 256; i++)
+        {
+            float hh = i > 512/3 ? 120.0f + float(i) / 256.0f * (-90.0f) : float(i) / 256.0f * 1.5f * 60.0f;
+            float ligth = 1.0f - i / 256.0f * (0.2f);
+            float r = 1.0f - 0.05f * (rand() % 128) / 128.0f;
+            HSV h(hh, r, ligth);
+            vector[i] = h;
+        }
+    }
+
+    /**
+     * @brief update
+     * @param pColorMap
+     * @param persentage (0~128)
+     */
+    void update( RGB* pColorMap, int persentage = 128)
+    {
+        int buf;
+        if (rand() % 128 > (128 - persentage))
+            index[0] = rand() % 256;
+        buf = index[0];
+        buf += rand() % 64 - 32;
+        if (buf < 0)
+            index[0] = 0;
+        else if (buf > 255)
+            index[0] = 255;
+        else
+            index[0] = buf;
+        for (int i = 1; i < BLADE_PIXEL; i++)
+        {
+            int a = (index[i] + index[i - 1] + rand() % 3) / 2;
+            index[i] = a > 255 ? 255 : a;
+            *pColorMap++ = vector[index[i]];
+
+        }
+    }
+};
 /**
  * @brief 含位置信息的RGB
  */
@@ -275,6 +324,10 @@ protected: // vars
     bool needClear;
 
     /**
+     * @brief effect used for trigger 'rain' or 'flame'
+     */
+    Flame* flame;
+    /**
      * @name modes
      * @{
      */
@@ -339,6 +392,7 @@ public:
         , modeTrigger(-1)
         , durationFilter(1000)
         , RGBBlack(0, 0, 0, 255)
+        , flame(NULL)
     {
         setEventMask(0);
         isActive = false;
@@ -351,6 +405,8 @@ public:
      */
     virtual ~iBlade()
     {
+        if (flame != NULL)
+            delete flame;
         delete vector;
     }
 

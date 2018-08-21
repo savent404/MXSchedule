@@ -49,7 +49,14 @@ void iBlade::drawBackGroundDynamicRainbow(step_t &step)
 
 void iBlade::drawBackGroundFlame()
 {
-
+    float rate;
+    if (flame == NULL)
+    {
+        mDebug(DEBUG_LEVEL_ERROR, "Not alloc mem for flame");
+        return;
+    }
+    parameter->getParameter("NP_Density", rate);
+    flame->update(ptr(), int(rate * 1.28f));
 }
 
 void iBlade::drawFilterStatic()
@@ -491,15 +498,24 @@ bool iBlade::play(triggerID_t id, uint32_t duration)
         break;
     }
     case Out : {
+        int backGroundMode;
         parameterUpdate();
         clearW();
         parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        parameter->getParameter("NP_Cset", backGroundMode);
         stepTrigger.totalStep /= BLADE_INTERVAL;
         stepTrigger.nowStep = 0;
         stepTrigger.repeatCnt = 0;
         modeTrigger = 6;
         isActive = true;
         needClear = true;
+        if (backGroundMode == 5)
+        {
+            if (flame == NULL)
+            {
+                flame = new Flame;
+            }
+        }
         break;
     }
     case ColorSwitch:
