@@ -132,7 +132,6 @@ public: // API
             _ptr->R = colorStart.R + sub[0] * i / num;
             _ptr->G = colorStart.G + sub[1] * i / num;
             _ptr->B = colorStart.B + sub[2] * i / num;
-            _ptr->W = colorStart.W;
             _ptr++;
         }
     }
@@ -261,6 +260,8 @@ protected: // API
     void drawTriggerFollowVol();
     void drawTriggerComet(step_t& step);
     /** @} */
+
+    void clearW();
 
 protected: // vars
     /**

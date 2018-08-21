@@ -71,7 +71,7 @@ public:
         R = other.R;
         G = other.G;
         B = other.B;
-        W = other.W;
+//        W = other.W;
         return *this;
     }
 

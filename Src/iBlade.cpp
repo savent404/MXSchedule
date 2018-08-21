@@ -197,6 +197,13 @@ void iBlade::drawTriggerComet(step_t &step)
     }
 }
 
+void iBlade::clearW()
+{
+    RGB* _p = ptr();
+    for (int i = 0; i < getPixelNum(); i++, _p++)
+        _p->W = 255;
+}
+
 void iBlade::parameterUpdate()
 {
     parameter->getParameter("NP_Cset", modeBackGround);
@@ -215,6 +222,7 @@ void iBlade::hanlde()
     {
         RGB a;
         needClear = false;
+        clearW();
         drawLine(a, 0, getPixelNum());
     }
     if (isActive == false)
@@ -463,6 +471,7 @@ bool iBlade::play(triggerID_t id, uint32_t duration)
     }
     case Out : {
         parameterUpdate();
+        clearW();
         parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
         stepTrigger.totalStep /= BLADE_INTERVAL;
         stepTrigger.nowStep = 0;
