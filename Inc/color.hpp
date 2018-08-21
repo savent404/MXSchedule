@@ -224,7 +224,7 @@ typedef struct HSV {
     /**
      * @brief 构造:HSV值
      */
-    HSV(uint8_t _h, uint8_t _s, uint8_t _v)
+    HSV(float _h, float _s, float _v)
     {
         h = _h;
         s = _s;
