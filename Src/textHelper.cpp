@@ -51,6 +51,19 @@ bool matchBankn(const char* input, int& bankIndex)
     return true;
 }
 
+bool matchComboN(const char *input, int &comboIndex, char *sequence, int &priority)
+{
+    if (strncasecmp(input, "combo", 5))
+        return false;
+    if (re_match("^\\d+=\\w+-\\d+", input + 5) == -1)
+        return false;
+    sscanf(input + 5, "%d=%[^-]s", &comboIndex, sequence);
+    while (*input != '-')
+        input++;
+    sscanf(input + 1, "%d", &priority);
+    return true;
+}
+
 bool matchCFGn(const char* input, int& configIndex)
 {
     if (re_match("CFG\\d+:", input) == -1)
@@ -95,3 +108,4 @@ bool matchKeyValue(const char* input, string& key, RGB& v)
     key = nameBuffer;
     return true;
 }
+

@@ -1,44 +1,64 @@
 #pragma once
 
+#include "color.hpp"
 #include "common.h"
 #include "iEvent.hpp"
 #include "iParam.h"
 #include <stdint.h>
-#include "color.hpp"
 
-// length(0.0f...1.0f)
+/** @brief flow length(0.0f...1.0f) */
 #ifndef BLADE_COMET_LENGTH
 #define BLADE_COMET_LENGTH (0.2f)
 #endif
 
-class iBladeDriver
-{
-  private:
+/**
+ * @brief iBladeDriver iBlade底层驱动
+ * @details 实现颜色存储，基本两种绘画，定义了绘画接口
+ */
+class iBladeDriver {
+private:
+    /** @brief Pixel数量 */
     int numPixe;
 
-  protected:
-    RGB *vector;
+protected:
+    /**
+     * @brief 颜色存储结构 
+     */
+    RGB* vector;
 
-  public:
+public:
+    /**
+     * @brief 根据指定的Pixel数量构造驱动
+     */
     iBladeDriver(size_t pixelNum)
     {
         numPixe = pixelNum;
         vector = new RGB[pixelNum];
     }
+
+    /**
+     * @brief 析构
+     */
     virtual ~iBladeDriver()
     {
         delete vector;
     }
 
+    /**
+     * @brief 返回Pixel数量
+     * @note  此函数在绘制函数中大量使用
+     */
     int getPixelNum() const
     {
         return numPixe;
     }
 
-    RGB &operator[](int pos)
+    /**
+     * @brief 通过数组形式访问颜色
+     */
+    RGB& operator[](int pos)
     {
-        if (pos > numPixe)
-        {
+        if (pos > numPixe) {
             mDebug(DEBUG_LEVEL_ERROR, "Vector Out of Range:%d/%d", pos, numPixe);
             return *vector;
         }
@@ -46,17 +66,23 @@ class iBladeDriver
         return vector[pos];
     }
 
-    const RGB *c_ptr() const
+    /**
+     * @brief 获取整个数组的只读指针
+     */
+    const RGB* c_ptr() const
     {
         return vector;
     }
 
-    RGB *ptr()
+    /**
+     * @brief 获取整个数组的指针
+     */
+    RGB* ptr()
     {
         return vector;
     }
 
-  public: // API
+public: // API
     /**
      * @brief drawLine
      * @param driver
@@ -64,12 +90,11 @@ class iBladeDriver
      * @param start [0...pixelNum-1]
      * @param end   [0...pixelNum-1]
      */
-    void drawLine(RGB &color, int start, int end)
+    void drawLine(RGB& color, int start, int end)
     {
-        RGB *_ptr = start >= 0 ? ptr() + start : ptr();
+        RGB* _ptr = start >= 0 ? ptr() + start : ptr();
         int num = end - start;
-        for (int i = 0; i < num; i++)
-        {
+        for (int i = 0; i < num; i++) {
             if (i < 0 || i >= getPixelNum())
                 continue;
             *_ptr++ = color;
@@ -84,16 +109,16 @@ class iBladeDriver
      * @param posStart
      * @param posEnd
      */
-    void drawShade(RGB &colorStart,
-                   RGB &colorEnd,
-                   int posStart,
-                   int posEnd)
+    void drawShade(RGB& colorStart,
+        RGB& colorEnd,
+        int posStart,
+        int posEnd)
     {
         if (colorStart.similar(colorEnd))
             drawLine(colorStart, posStart, posEnd);
 
         int sub[4];
-        RGB *_ptr = posStart >= 0 ? ptr() + posStart : ptr();
+        RGB* _ptr = posStart >= 0 ? ptr() + posStart : ptr();
         int num = posEnd - posStart;
 
         sub[0] = colorEnd.R - colorStart.R;
@@ -101,23 +126,81 @@ class iBladeDriver
         sub[2] = colorEnd.B - colorStart.B;
         sub[3] = colorEnd.W - colorStart.W;
 
-        for (int i = 0; i < num; i++)
-        {
+        for (int i = 0; i < num; i++) {
             if (i + posStart < 0 || i + posStart >= getPixelNum())
                 continue;
             _ptr->R = colorStart.R + sub[0] * i / num;
             _ptr->G = colorStart.G + sub[1] * i / num;
             _ptr->B = colorStart.B + sub[2] * i / num;
-            _ptr->W = colorStart.W;
             _ptr++;
         }
     }
+
+    /**
+     * @brief 驱动接口
+     * @details 通过BLADE_INTERVAL间隔事件调用一次
+     */
     virtual void update() = 0;
 };
 
-typedef struct vertex_t
-{
-    vertex_t(RGB c, int p) : color(c), pos(p){}
+
+/**
+ * @brief Flame effect
+ */
+class Flame {
+    RGB vector[256];
+    uint8_t index[BLADE_PIXEL];
+public:
+    Flame()
+    {
+        memset(index, 0, sizeof(index));
+        index[0] = 255;
+        for (int i = 0; i < 256; i++)
+        {
+            float hh = i > 512/3 ? 120.0f + float(i) / 256.0f * (-90.0f) : float(i) / 256.0f * 1.5f * 60.0f;
+            float ligth = 1.0f - i / 256.0f * (0.2f);
+            float r = 1.0f - 0.05f * (rand() % 128) / 128.0f;
+            HSV h(hh, r, ligth);
+            vector[i] = h;
+        }
+    }
+
+    /**
+     * @brief update
+     * @param pColorMap
+     * @param persentage (0~128)
+     */
+    void update( RGB* pColorMap, int persentage = 128)
+    {
+        int buf;
+        if (rand() % 128 > (128 - persentage))
+            index[0] = rand() % 256;
+        buf = index[0];
+        buf += rand() % 64 - 32;
+        if (buf < 0)
+            index[0] = 0;
+        else if (buf > 255)
+            index[0] = 255;
+        else
+            index[0] = buf;
+        for (int i = 1; i < BLADE_PIXEL; i++)
+        {
+            int a = (index[i] + index[i - 1] + rand() % 3) / 2;
+            index[i] = a > 255 ? 255 : a;
+            *pColorMap++ = vector[index[i]];
+
+        }
+    }
+};
+/**
+ * @brief 含位置信息的RGB
+ */
+typedef struct vertex_t {
+    vertex_t(RGB c, int p)
+        : color(c)
+        , pos(p)
+    {
+    }
     RGB color;
     int pos;
 } vertex_t;
@@ -131,7 +214,7 @@ typedef struct vertex_t
  */
 typedef struct step_t {
 
-    step_t(int now, int total, int cnt=0)
+    step_t(int now, int total, int cnt = 0)
     {
         nowStep = now;
         totalStep = total;
@@ -145,8 +228,7 @@ typedef struct step_t {
     bool walk()
     {
         bool finishALoop = ++nowStep >= totalStep;
-        if (finishALoop)
-        {
+        if (finishALoop) {
             nowStep = 0;
             if (repeatCnt == 0)
                 return true;
@@ -156,16 +238,47 @@ typedef struct step_t {
         return false;
     }
 
+    /** @brief 当前step */
     int nowStep;
+    /** @brief step总数 */
     int totalStep;
+    /** 重复次数 cnt=-1时为无限循环 */
     int repeatCnt;
 } step_t;
 
-class iBlade : public iEvent, public iBladeDriver
-{
-  protected:
-    const iParam *parameter;
-  protected: // API
+/**
+ * @brief iBlade
+ * @note  consider implement it with thread
+ * @details 需要用另一个线程调用iBlade::handle
+ * \code{.cpp}
+ * class myBlade : public iBlade, public Thread {
+ *   myBlade(.....) : iBlade(....), Thread(....) { }
+ *   ~myBlade() {
+ *       ~iBlade();
+ *       ~Thread();
+ *   }
+ *   virtual run() {
+ *       iBlade::handle();
+ *       if (isActive)
+ *           iBladeDriver::update();
+ *       delay(BLADE_INTERVAL);
+ *   }
+ *  };
+ *  int main()
+ *  {
+ *   myBlade b(...);
+ *   b.start();
+ *  }
+ * \endcode
+ */
+class iBlade : public iEvent, public iBladeDriver {
+protected:
+    /**
+     * @brief const pointer to call iParam's API
+     */
+    const iParam* parameter;
+
+protected: // API
     /**
      * @name BackGround
      * @{ */
@@ -180,8 +293,8 @@ class iBlade : public iEvent, public iBladeDriver
      * @name Dynamic Filter
      * @{ */
     void drawFilterStatic();
-    void drawFilterBreath(step_t &step);
-    void drawFilterFlow(step_t &step);
+    void drawFilterBreath(step_t& step);
+    void drawFilterFlow(step_t& step);
     void drawFilterSpark();
     void drawFilterRain();
     void drawFilterVolFollow();
@@ -191,44 +304,87 @@ class iBlade : public iEvent, public iBladeDriver
      * @name Trigger
      * @{ */
     void drawTriggerNone();
-    void drawTriggerSpark(step_t &step);
-    void drawTriggerPartialSpark(step_t &step);
+    void drawTriggerSpark(step_t& step);
+    void drawTriggerPartialSpark(step_t& step);
     void drawTriggerFollowVol();
-    void drawTriggerComet(step_t &step);
+    void drawTriggerComet(step_t& step);
     /** @} */
 
+    void clearW();
+
 protected: // vars
+    /**
+     * @brief flag if active
+     * @details if isActive==true iBlade call iBladeDriver::update to display effect */
     bool isActive;
+
+    /**
+     * @brief flag if clear all pixel to black
+     */
     bool needClear;
+
+    /**
+     * @brief effect used for trigger 'rain' or 'flame'
+     */
+    Flame* flame;
+    /**
+     * @name modes
+     * @{
+     */
     int modeBackGround;
-    int modeFilter;
-    int durationFilter;
+    /**
+     * @brief modeTrigger
+     * @details mode=-1 means invalide
+     *          mode=6 means triggerOut
+     *          mode=7 means triggerIn
+     *          mode=8 means colorSwitch
+     */
     int modeTrigger; //1~5, -1 means invalide, 6-triggerOut 7-triggerIn 8-ColorSwitch
+    int modeFilter;
+    /** @} */
+
+    /** @brief 定义滤镜效果的持续事件(周期) */
+    int durationFilter;
+
+    /**
+     * @name steps
+     * @{ */
     step_t stepBackGround;
     step_t stepFilter;
     step_t stepTrigger;
+    /** @} */
 
+    /**
+     * @name Colors
+     * @{ */
     RGB MC;
     RGB FC;
     RGB LC;
+    /** @brief pre-MC, used in colorSwitch */
     RGB oldMC;
+    /** @brief cached black, used to clear pixels */
     RGB RGBBlack;
+    /** @} */
 
-  public:
+public:
     /**
      * @brief event
      */
-    typedef enum event_t
-    {
+    typedef enum event_t {
+        /** @brief trigger start event */
         event_start = 0x01,
+        /** @brief trigger end event */
         event_end = 0x02
     } event_t;
 
-    iBlade(const iParam *p)
+    /**
+     * @brief 构造
+     */
+    iBlade(const iParam* p)
         : iEvent(EVENT_MODULE_ID_BLADE)
         , parameter(p)
         , iBladeDriver(BLADE_PIXEL)
-        , stepBackGround(0, 2000/BLADE_INTERVAL, -1)
+        , stepBackGround(0, 2000 / BLADE_INTERVAL, -1)
         , stepTrigger(0, 0, 0)
         , stepFilter(0, 0, -1)
         , modeBackGround(1)
@@ -236,20 +392,51 @@ protected: // vars
         , modeTrigger(-1)
         , durationFilter(1000)
         , RGBBlack(0, 0, 0, 255)
+        , flame(NULL)
     {
         setEventMask(0);
         isActive = false;
         needClear = true;
     }
 
+    /**
+     * @brief 析构
+     * @note  需调用父类的析构
+     */
     virtual ~iBlade()
     {
+        if (flame != NULL)
+            delete flame;
         delete vector;
     }
 
 public:
+    /**
+     * @brief handle
+     * @note should call it at another thread
+     * @note call this function, interval=BLADE_INTERVAL(ms)
+     */
     void hanlde();
+
+    /**
+     * @brief update cached parameter
+     * @note  when etc. trigger'Out', trigger'ColorSwitch'
+     */
     void parameterUpdate();
+
+    /**
+     * @brief start a trigger
+     * @note maybe sub-class has some sepecific operator
+     *        , so it's virtual method.
+     * @return if start trigger is good.
+     */
     virtual bool play(triggerID_t id, uint32_t audioDuration = 0);
+
+    /**
+     * @brief end a trigger
+     * @note maybe sub-class has some sepecific operator
+     *       , so it's virtual method.
+     * @return if end trigger is good.
+     */
     virtual bool abort(triggerID_t id = Unknow);
 };

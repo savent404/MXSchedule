@@ -1,22 +1,42 @@
 #pragma once
 
-#include <stdint.h>
 #include <math.h>
+#include <stdint.h>
 
-class RGB
-{
-  public:
+/**
+ * @brief RGB 颜色空间
+ */
+class RGB {
+public:
+    /** @brief R */
     uint8_t R;
+    /** @brief G */
     uint8_t G;
+    /** @brief B */
     uint8_t B;
+    /** 
+     * @brief only for iBlade adjust
+     * @details d表示透明度 0为全透明 255为不透明
+     * @note 用户不可见,只为提高iBlade性能
+     */
     uint8_t W; // user cant see it!
 
+    /**
+     * @brief 构造
+     * @param w 默认值255
+     */
     RGB(uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, uint8_t w = 255)
-        : R(r), G(g), B(b), W(w)
+        : R(r)
+        , G(g)
+        , B(b)
+        , W(w)
     {
     }
 
-    RGB(const RGB &r)
+    /**
+     * @brief 拷贝
+     */
+    RGB(const RGB& r)
     {
         this->R = r.R;
         this->G = r.G;
@@ -24,7 +44,11 @@ class RGB
         this->W = r.W;
     }
 
-    RGB(const RGB &r,
+    /**
+     * @brief 拷贝(包括加法运算)
+     * @warning 因性能考虑已弃用
+     */
+    RGB(const RGB& r,
         int offset_r,
         int offset_g,
         int offset_b,
@@ -35,7 +59,11 @@ class RGB
         B = r.B + offset_b;
         W = r.W + offset_w;
     }
-    RGB &operator=(const RGB &other)
+
+    /**
+     * @brief 拷贝
+     */
+    RGB& operator=(const RGB& other)
 
     {
         if (&other == this)
@@ -43,31 +71,53 @@ class RGB
         R = other.R;
         G = other.G;
         B = other.B;
-        W = other.W;
+//        W = other.W;
         return *this;
     }
-    RGB &operator-=(const RGB &other)
+
+    /**
+     * @brief RGB减法
+     * @note 此方法不会产生多余的拷贝和构造
+     * @warning 可能会产生溢出
+     */
+    RGB& operator-=(const RGB& other)
     {
         R -= other.R;
         G -= other.G;
         B -= other.B;
         return *this;
     }
-    RGB &operator+=(const RGB &other)
+
+    /**
+     * @brief RGB加法
+     * @note 此方法不会产生多余的拷贝构造
+     * @warning 可能会产生溢出
+     */
+    RGB& operator+=(const RGB& other)
     {
         R += other.R;
         G += other.G;
         B += other.B;
         return *this;
     }
-    RGB &operator *=(const float q)
+
+    /**
+     * @brief RGB乘法
+     * @note 此方法不会产生多余的拷贝构造
+     * @warning 可能会产生溢出
+     */
+    RGB& operator*=(const float q)
     {
         R *= q;
         G *= q;
         B *= q;
         return *this;
     }
-    bool operator==(const RGB &other)
+
+    /**
+     * @brief 判断两个class RGB是否全等
+     */
+    bool operator==(const RGB& other)
     {
         if (&other == this)
             return true;
@@ -81,7 +131,12 @@ class RGB
             return false;
         return true;
     }
-    bool similar(const RGB &other, uint8_t offset = 10)
+
+    /**
+     * @brief 判断两个class RGB是否s相似
+     * @note  结合了w的透明色
+     */
+    bool similar(const RGB& other, uint8_t offset = 10)
     {
         int sub;
         if (&other == this)
@@ -97,66 +152,97 @@ class RGB
             return false;
         return true;
     }
+
+    /**
+     * @brief 获取RGB平均亮度
+     * @note  不符合人眼色感
+     */
     uint8_t light() const
     {
         int sum = R + G + B;
         return sum / 3;
     }
+
+    /**
+     * @brief 获取RGB平均亮度
+     * @note  符合人眼色感
+     */
     uint8_t realLight() const
     {
         return (uint8_t((R * 299) + (G * 587) + (B * 114)) / 1000);
     }
+
+    /**
+     * @brief 获取带w参数的R分量
+     */
     uint8_t wR() const
     {
-        if (W != 255)
-        {
+        if (W != 255) {
             return (R * W) >> 8;
-        }
-        else
-        {
+        } else {
             return R;
         }
     }
+
+    /**
+     * @brief 获取带w参数的G分量
+     */
     uint8_t wG() const
     {
-        if (W != 255)
-        {
+        if (W != 255) {
             return (G * W) >> 8;
-        }
-        else
-        {
+        } else {
             return G;
         }
     }
+
+    /**
+     * @brief 获取带w参数的B分量
+     */
     uint8_t wB() const
     {
-        if (W != 255)
-        {
+        if (W != 255) {
             return (B * W) >> 8;
-        }
-        else
-        {
+        } else {
             return B;
         }
     }
 };
-
-typedef struct HSV
-{
+/**
+ * @brief HSV颜色空间
+ * @details 使用HSV颜色空间将某一个RGB颜色
+ *          调整其色相,所以需要实现RBG-HSV相互转换
+ */
+typedef struct HSV {
+    /** @brief Hue 色相 单位:°*/
     float h;
+    /** @brief saturation 饱和度 (0...1.0) */
     float s;
+    /** @brief value 亮度 (0..1.0) */
     float v;
-    HSV(uint8_t _h, uint8_t _s, uint8_t _v)
+
+    /**
+     * @brief 构造:HSV值
+     */
+    HSV(float _h, float _s, float _v)
     {
         h = _h;
         s = _s;
         v = _v;
     }
+    /**
+     * @brief 构造:class RGB
+     * @param rgb class RGB
+     * @note  It's just call HSV::operator=
+     */
     HSV(RGB& rgb)
     {
         *this = rgb;
     }
-
+    /**
+     * @brief convert HSV to RGB
+     * @return class RGB
+     */
     RGB convert2RGB()
     {
         // In-case h is negative
@@ -186,10 +272,12 @@ typedef struct HSV
         }
     }
 
+    /**
+     * @brief copy from another HSV
+     */
     HSV& operator=(const HSV& other)
     {
-        if (&other == this)
-        {
+        if (&other == this) {
             return *this;
         }
         h = other.h;
@@ -197,7 +285,10 @@ typedef struct HSV
         v = other.v;
     }
 
-    HSV& operator =(const RGB& rgb)
+    /**
+     * @brief convert a RGB to HSV
+     */
+    HSV& operator=(const RGB& rgb)
     {
         float r = rgb.R / 255.0f;
         float g = rgb.G / 255.0f;
@@ -241,8 +332,10 @@ typedef struct HSV
         return *this;
     }
 
-    operator class RGB()
-    {
+    /**
+     * @brief HSV can auto-convert to RGB
+     */
+    operator class RGB() {
         return this->convert2RGB();
     }
 } HSV;

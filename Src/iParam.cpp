@@ -11,10 +11,34 @@ void iParam::setParameterFromLine(const char* line)
     static RGB aRGB;
 
     char buffer[128];
+    char comboSequence[64];
+    int comboIndex;
+    int comboPriorty;
     static string key;
 
     ripWords(line, buffer);
-    if (matchKeyValue(buffer, key, aInt)) {
+    if (matchComboN(buffer, comboIndex, comboSequence, comboPriorty)) {
+        int len = strlen(comboSequence);
+        bool isRight = true;
+        combo_t newCombo(len, comboPriorty, comboIndex);
+        for (int i = 0; i < len; i++)
+        {
+            if (comboSequence[i] == 's' || comboSequence[i] == 'S')
+                newCombo.sequence[i] = 0;
+            else if (comboSequence[i] == 'c' || comboSequence[i] == 'C')
+                newCombo.sequence[i] = 1;
+            else if (comboSequence[i] == 'b' || comboSequence[i] == 'B')
+                newCombo.sequence[i] = 2;
+            else {
+                isRight = false;
+                break;
+            }
+        }
+        if (isRight == true)
+        {
+            comboParam.push_back(newCombo);
+        }
+    } else if (matchKeyValue(buffer, key, aInt)) {
         bool isTypeInt = setParameter(key.c_str(), aInt);
         if (isTypeInt == false) {
             float realFloat = aInt;
@@ -165,6 +189,8 @@ bool iParam::switchBank(int pos)
         triggerNum[i] = searchFileCnt(path.c_str(), "\\w+.WAV");
     }
 
+    // clear all storaged combo parameter
+    comboParam.clear();
     setDefaultParameter();
 
     if (!readConfigFromFile((workPath + "SETTING.txt").c_str())) {
@@ -207,6 +233,11 @@ string iParam::getBankName() const
 int iParam::getTriggerNum(triggerID_t id) const
 {
     return triggerNum[id];
+}
+
+const vector<iParam::combo_t> *iParam::comboList() const
+{
+    return &comboParam;
 }
 
 string iParam::getPrefixPath() const

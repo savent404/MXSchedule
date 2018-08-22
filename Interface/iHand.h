@@ -2,12 +2,16 @@
 
 #include "iEvent.hpp"
 
+/**
+ * @brief 手势识别模块
+ * @details 通过iEvent API发送事件到iSchedule
+ * @note  可以通过多线程轮询，或者直接在中断中发送事件
+ */
 class iHand : public iEvent {
 public:
     /**
      * @brief iHande event
-     * @details
-     * event's name show as same as triggers
+     * @details event's name show as same as triggers
      */
     typedef enum event_t {
         handSwing = 0x1,
@@ -21,14 +25,10 @@ public:
      * @brief iHand
      * @note other mothod is not necessary, implement in sub-class
      */
-    iHand():iEvent(EVENT_MODULE_ID_HAND)
+    iHand()
+        : iEvent(EVENT_MODULE_ID_HAND)
     {
         setEventMask(
-            handSwing |
-            handSlash |
-            handSpin |
-            handStab |
-            handClash
-        );
+            handSwing | handSlash | handSpin | handStab | handClash);
     }
 };

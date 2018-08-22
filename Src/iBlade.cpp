@@ -49,7 +49,14 @@ void iBlade::drawBackGroundDynamicRainbow(step_t &step)
 
 void iBlade::drawBackGroundFlame()
 {
-
+    float rate;
+    if (flame == NULL)
+    {
+        mDebug(DEBUG_LEVEL_ERROR, "Not alloc mem for flame");
+        return;
+    }
+    parameter->getParameter("NP_Density", rate);
+    flame->update(ptr(), int(rate * 1.28f));
 }
 
 void iBlade::drawFilterStatic()
@@ -135,7 +142,28 @@ void iBlade::drawFilterSpark()
 
 void iBlade::drawFilterRain()
 {
-
+    float rate = 0.0f;
+    parameter->getParameter("NP_Density", rate);
+    int loopCnt = rand() % 100 > rate ? 0 : 1;
+    int ans;
+    RGB* _p = ptr();
+    for (int i = 0; i < loopCnt; i++)
+    {
+        int pos = rand() % getPixelNum();
+        (_p + pos)->W = 0;
+    }
+    for (int i = 1; i < getPixelNum(); i++)
+    {
+        if (i) {
+            ans = _p[i - 1].W + _p[i].W + _p[i + 1].W + 2;
+            ans /= 3;
+            _p[i].W = ans > 255 ? 255 : ans;
+        } else {
+            ans = _p[i].W + _p[i + 1].W + 2;
+            ans /= 2;
+            _p[i].W = ans > 255 ? 255 : ans;
+        }
+    }
 }
 
 void iBlade::drawFilterVolFollow()
@@ -197,6 +225,13 @@ void iBlade::drawTriggerComet(step_t &step)
     }
 }
 
+void iBlade::clearW()
+{
+    RGB* _p = ptr();
+    for (int i = 0; i < getPixelNum(); i++, _p++)
+        _p->W = 255;
+}
+
 void iBlade::parameterUpdate()
 {
     parameter->getParameter("NP_Cset", modeBackGround);
@@ -215,6 +250,7 @@ void iBlade::hanlde()
     {
         RGB a;
         needClear = false;
+        clearW();
         drawLine(a, 0, getPixelNum());
     }
     if (isActive == false)
@@ -462,14 +498,24 @@ bool iBlade::play(triggerID_t id, uint32_t duration)
         break;
     }
     case Out : {
+        int backGroundMode;
         parameterUpdate();
+        clearW();
         parameter->getParameter("NP_Tcomet", stepTrigger.totalStep);
+        parameter->getParameter("NP_Cset", backGroundMode);
         stepTrigger.totalStep /= BLADE_INTERVAL;
         stepTrigger.nowStep = 0;
         stepTrigger.repeatCnt = 0;
         modeTrigger = 6;
         isActive = true;
         needClear = true;
+        if (backGroundMode == 5)
+        {
+            if (flame == NULL)
+            {
+                flame = new Flame;
+            }
+        }
         break;
     }
     case ColorSwitch:

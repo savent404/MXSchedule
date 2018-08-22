@@ -3,6 +3,11 @@
 #include "common.h"
 #include "iParam.h"
 #include <stdint.h>
+
+/**
+ * @brief 音频模块
+ * @details 支持最高3个track同时播放
+ */
 class iAudio : public iEvent {
 public:
     /**
@@ -13,6 +18,11 @@ public:
      * - track1 identify it's track_1, mixed with start or end
      * - track2 identify it's track_2, mixed with start or end
      * - track3 identify it's track_3, mixed with start or end
+     * @note
+     * 发送事件时需要start/end与trackID组合使用:
+     * @code
+     * sendEvent(track1 | start);
+     * @endcode
      */
     typedef enum event_t {
         start = 0x01,
@@ -50,6 +60,7 @@ public:
     } track_t;
 
     typedef int trackId_t;
+
 protected:
     /** @brief should get parameter from this instance */
     const iParam* parameter;
@@ -57,6 +68,7 @@ protected:
     track_t track[3];
     /** @brief storage hum.wav in which track */
     trackId_t mainTrackId;
+
 public:
     iAudio(const iParam* p)
         : iEvent(EVENT_MODULE_ID_AUDIO)
@@ -76,10 +88,11 @@ public:
     /**
      * @brief play
      * @param id
+     * @param comboIndex if triggerd a combo,should give index
      * @note  this mothod would call iAudio::_play
      * @return trigger's track id
      */
-    trackId_t play(triggerID_t id);
+    trackId_t play(triggerID_t id, int comboIndex = -1);
 
     /**
      * @brief mainTrack enable/disable background audio
@@ -94,7 +107,7 @@ public:
      * @param mode
      * @return audio's track id
      */
-    virtual trackId_t _play(const char* wavPath, mode_t mode = oneShout) =  0;
+    virtual trackId_t _play(const char* wavPath, mode_t mode = oneShout) = 0;
 
     /**
      * @brief abort
