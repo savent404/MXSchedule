@@ -5,7 +5,7 @@
 #include "systemSupport.h"
 
 #ifndef USE_QT
-#define USE_QT 1
+#define USE_QT 0
 #endif
 
 

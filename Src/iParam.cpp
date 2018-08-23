@@ -186,7 +186,11 @@ bool iParam::switchBank(int pos)
     // set parameter
     for (size_t i = 0; i < sizeof(triggerName) / sizeof(string); i++) {
         string path = bankName + triggerName[i] + "/";
+#if USE_QT == 1
         triggerNum[i] = searchFileCnt(path.c_str(), "\\w+.WAV");
+#else
+        triggerNum[i] = searchFileCnt(path.c_str(), "*.WAV");
+#endif
     }
 
     // clear all storaged combo parameter

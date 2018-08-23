@@ -252,6 +252,7 @@ void iBlade::hanlde()
         needClear = false;
         clearW();
         drawLine(a, 0, getPixelNum());
+        update();
     }
     if (isActive == false)
         return;

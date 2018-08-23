@@ -24,7 +24,7 @@ protected:
     /**
      * @brief 颜色存储结构 
      */
-    RGB* vector;
+    RGB *vector;
 
 public:
     /**
@@ -39,7 +39,7 @@ public:
     /**
      * @brief 析构
      */
-    virtual ~iBladeDriver()
+    ~iBladeDriver()
     {
         delete vector;
     }
@@ -407,7 +407,6 @@ public:
     {
         if (flame != NULL)
             delete flame;
-        delete vector;
     }
 
 public:
