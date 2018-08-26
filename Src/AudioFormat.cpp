@@ -1,10 +1,10 @@
 #include "AudioFormat.h"
 
 bool convertWavFormat(
-        const wavFormat_t& Iformat,
+        const audioFormat_t& Iformat,
         const void* pIBuffer,
         const size_t iBytesSize,
-        const wavFormat_t& Oformat,
+        const audioFormat_t& Oformat,
         void *pOBuffer,
         const size_t oBytesSize)
 {
@@ -57,3 +57,53 @@ bool convertWavFormat(
 
     return true;
 }
+
+bool readWavFormat(wavFormat_t& format, const void* ptr)
+{
+    /** run id check */
+    const char* pChunkID = static_cast<const char*>(ptr);
+    const char* pSubChunk1ID = static_cast<const char*>(ptr + 12);
+    const char* pSubChunk2ID = static_cast<const char*>(ptr + 36);
+    const char* pFormat = static_cast<const char*>(ptr + 8);
+    const uint16_t* pAudioFormat = static_cast<const uint16_t*>(ptr + 20);
+
+    if (strncmp(pChunkID, "RIFF", 4))
+        return false;
+    if (strncmp(pSubChunk1ID, "fmt ", 4))
+        return false;
+    if (strncmp(pSubChunk2ID, "data", 4))
+        return false;
+    if (strncmp(pFormat, "WAVE", 4))
+        return false;
+    if (*pAudioFormat != 1)
+        return false;
+
+    /** Get information */
+    const uint16_t *pNumChannels = static_cast<const uint16_t*>(ptr + 22);
+    const uint32_t *pSampleRate = static_cast<const uint32_t*>(ptr + 24);
+    const uint16_t *pBitsPerSample = static_cast<const uint16_t*>(ptr + 34);
+    const uint32_t *pSize = static_cast<const uint32_t*>(ptr + 40);
+
+    format.channels = *pNumChannels;
+    format.frequence = *pSampleRate;
+    format.bits = *pBitsPerSample;
+    format.totalSize = *pSize;
+    return true;
+}
+
+int wavTime2Size(const audioFormat_t& format, int ms)
+{
+    int formatedDepth = format.bits / 8 + ((format.bits & 7) ? 1 : 0);
+    int oneSecSize = formatedDepth * format.frequence * format.channels;
+
+    return oneSecSize * ms / 1000;
+}
+
+int wavSize2Time( const audioFormat_t& format, int size)
+{
+    int formatedDepth = format.bits / 8 + ((format.bits & 7) ? 1 : 0);
+    int oneSecSize = formatedDepth * format.frequence * format.channels;
+
+    return size * 1000 / oneSecSize;
+}
+
