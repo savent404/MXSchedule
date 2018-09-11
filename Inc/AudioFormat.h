@@ -52,11 +52,22 @@ bool readWavFormat(
         wavFormat_t& format,
         const void* ptr);
 
-
+/**
+ * @brief convert wav play duration to data size
+ * @param[in] format
+ * @param[in] ms play duration
+ * @return data size in bytes
+ */
 int wavTime2Size(
         const audioFormat_t& format,
         int ms);
 
+/**
+ * @brief convert wav data size to play duration
+ * @param[in] format
+ * @param[in] data size in bytes
+ * @return play duration(ms)
+ */
 int wavSize2Time(
         const audioFormat_t& format,
         int size);

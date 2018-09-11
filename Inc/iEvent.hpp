@@ -97,17 +97,33 @@ public:
             sendFunc((module_id << 16) | e);
     }
 
+    /**
+     * @brief get moduleID from eventMessage
+     * @param[in] eventMessage 32-bits message recieved
+     * @return moduleID
+     */
     static uint16_t getModuleID(const uint32_t eventMessage)
     {
         return uint16_t(eventMessage >> 16);
     }
 
+    /**
+     * @brief get event from eventMessave
+     * @param[in] eventMessage 32-bits message recieved
+     * @return recieved event(16-bits)
+     */
     static uint16_t getEvent(const uint32_t eventMessage)
     {
         return uint16_t(eventMessage & 0xFFFF);
     }
 
 private:
+    /**
+     * @brief event mask only this event can be recieved.
+     */
     uint16_t event_mask;
+    /**
+     * @brief module_id module's ID
+     */
     uint16_t module_id;
 };

@@ -333,13 +333,27 @@ void iShechdule::parameterUpdate()
 
 iShechdule::triggerType_t iShechdule::classifyTriggerType(triggerID_t id)
 {
-    if (id == Swing || id == Spin || id == Slash)
-        return triggerType_1;
-    else if (id == Stab || id == Clash)
-        return triggerType_2;
-    else if (id == Blaster || id == Force)
-        return triggerType_3;
-    return triggerType_other;
+    triggerType_t type;
+    switch(id)
+    {
+        case Swing:
+        case Spin:
+        case Slash:
+            type = triggerType_1;
+            break;
+        case Stab:
+        case Clash:
+            type = triggerType_2;
+            break;
+        case Blaster:
+        case Force:
+            type = triggerType_3;
+            break;
+        default:
+            type = triggerType_other;
+            break;
+    }
+    return type;
 }
 
 bool iShechdule::handleCombo(triggerID_t id)
@@ -348,26 +362,36 @@ bool iShechdule::handleCombo(triggerID_t id)
     // storage tirggerType
     uint8_t tTrigger = classifyTriggerType(id) - 2;
     int combo_T;
-    list.param->getParameter("T_combo", combo_T);
+
+    // time-out
     if (comboLastTime <= mGetCPUTime())
     {
         comboQueue.clear();
     }
+
+    list.param->getParameter("T_combo", combo_T);
     comboQueue.push_back(tTrigger);
     comboLastTime = mGetCPUTime() + combo_T;
+
     // check if match any combo sequence
     const vector<iParam::combo_t>* l = list.param->comboList();
     int comboMaxLen = 0;
     for (size_t i = 0; i < l->size(); i++)
     {
         bool isSame = true;
+
+        /** calculate max len */
         if (comboMaxLen < l->at(i).len)
             comboMaxLen = l->at(i).len;
+
         if (l->at(i).len > comboQueue.size())
             continue;
-        for (size_t j = 0; j < l->at(i).len; j++)
+
+        size_t templateLen = l->at(i).len;
+        size_t posStart =comboQueue.size() - templateLen;
+        for (size_t j = 0; j < templateLen; j++)
         {
-            if (l->at(i).sequence[j] != comboQueue[j + comboQueue.size() - l->at(i).len])
+            if (l->at(i).sequence[j] != comboQueue[j + posStart])
             {
                 comboIndex = int(i);
                 isSame = false;
@@ -383,7 +407,7 @@ bool iShechdule::handleCombo(triggerID_t id)
     if (comboMaxLen < comboQueue.size())
     {
         comboQueue.erase(comboQueue.begin(),
-                         comboQueue.begin() + comboQueue.size() - comboMaxLen);
+                        comboQueue.begin() + comboQueue.size() - comboMaxLen);
         mDebug(DEBUG_LEVEL_VERBOSS, "Left comboQueue Size:%ud", comboQueue.size());
     }
     return false;
