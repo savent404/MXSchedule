@@ -33,3 +33,6 @@
 
 # Doxygen Output
 Doc/
+
+# build dir
+*build*/
