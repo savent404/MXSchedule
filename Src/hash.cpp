@@ -11,10 +11,6 @@ Hash::Hash(int maximum, size_t elementSize)
         arr[i].key = nullptr;
         arr[i].data = nullptr;
     }
-#if DEBUG_HASH
-    total_find = 0;
-    total_refind = 0;
-#endif
 }
 
 Hash::~Hash()
@@ -37,7 +33,7 @@ bool Hash::insert(const char *key, const void *data) {
     }
     else
     {
-        memcpy(arr[addr].data, data, size);
+        return false;
     }
     return true;
 }
@@ -67,6 +63,8 @@ bool Hash::getData(const char *key, void *data)
     int addr = findPosition(key);
     if (addr < 0 || arr[addr].flag != Hash::element_t::full)
         return false;
+    if (!arr[addr].data)
+        return false;
     memcpy(data, arr[addr].data, size);
     return true;
 }
@@ -76,10 +74,41 @@ bool Hash::setData(const char *key, const void *data)
     int addr = findPosition(key);
     if (addr < 0 || arr[addr].flag != Hash::element_t::full)
         return false;
+    if (!arr[addr].data)
+        return false;
     memcpy(arr[addr].data, data, size);
     return true;
 }
 
+void Hash::clearDleted()
+{
+    Hash::element_t *new_arr = new element_t[num];
+    Hash::element_t *old_arr = arr;
+    arr = new_arr;
+    for (int i = 0; i < num; i++)
+    {
+        new_arr[i].flag = element_t::empty;
+        new_arr[i].key = nullptr;
+        new_arr[i].data = nullptr;
+    }
+    arr = new_arr;
+
+    // insert all node into new arr
+    for (int i = 0; i < num; i++)
+    {
+        if (old_arr[i].flag == Hash::element_t::full)
+        {
+            insert(old_arr[i].key, old_arr[i].data);
+        }
+    }
+
+    // clear old_arr
+    for (int i = 0; i < num; i++)
+    {
+        freeElement(old_arr + i);
+    }
+    delete[] old_arr;
+}
 void Hash::allocElement(Hash::element_t *element, const char *name, const void *data, size_t size)
 {
     if (element->flag == Hash::element_t::full)
@@ -115,21 +144,14 @@ int Hash::findPosition(const char *key)
     unsigned addr = H1(key);
     unsigned cnt = 0;
 
-#if DEBUG_HASH
-    this->total_find++;
-#endif
-
-    while (arr[addr].flag == element_t::full)
+    while (arr[addr].flag == Hash::element_t::full || arr[addr].flag == Hash::element_t::deleted)
     {
-        if (strcasecmp(arr[addr].key, key) == 0)
+        if (arr[addr].key && strcmp(arr[addr].key, key) == 0)
             break;
 
         if (++cnt > num)
             return -1;
         addr = static_cast<unsigned>(H1(key) + H2(key, cnt)) % num;
-#if DEBUG_HASH
-        this->total_refind++;
-#endif
     }
     return static_cast<int>(addr);
 }
@@ -152,5 +174,11 @@ unsigned Hash::H1(const char* key)
 
 unsigned Hash::H2(const char* key, unsigned i)
 {
-    return i*H1(key) + i;
+    unsigned seed = 131;
+    unsigned hash = 0;
+    while (*key)
+    {
+        hash = hash * seed + (*key++);
+    }
+    return (hash * i) & 0x7FFFFFFF;
 }
