@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(MXCore)
 
-option(TEST "enable test function.It depend on google-test" ON)
+option(TEST "enable test function.It depend on google-test" OFF)
 set (MXSchedule_VERSION_MAJOR 0)
 set (MXSchedule_VERSION_MINOR 1)
 
