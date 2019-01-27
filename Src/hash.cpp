@@ -50,7 +50,7 @@ bool Hash::remove(const char *key)
     return true;
 }
 
-bool Hash::isHas(const char *key)
+bool Hash::isHas(const char *key) const
 {
     int addr = findPosition(key);
     if (addr < 0)
@@ -58,7 +58,7 @@ bool Hash::isHas(const char *key)
     return arr[addr].flag != Hash::element_t::full ? false : true;
 }
 
-bool Hash::getData(const char *key, void *data)
+bool Hash::getData(const char *key, void *data) const
 {
     int addr = findPosition(key);
     if (addr < 0 || arr[addr].flag != Hash::element_t::full)
@@ -139,7 +139,7 @@ void Hash::freeElement(Hash::element_t *element)
     }
 }
 
-int Hash::findPosition(const char *key)
+int Hash::findPosition(const char *key) const
 {
     unsigned addr = H1(key);
     unsigned cnt = 0;
