@@ -235,7 +235,7 @@ int iParam::getTriggerNum(triggerID_t id) const
     return triggerNum[id];
 }
 
-const vector<iParam::combo_t> *iParam::comboList() const
+const vector<combo_t> *iParam::comboList() const
 {
     return &comboParam;
 }

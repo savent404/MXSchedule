@@ -9,6 +9,7 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include "combo.h"
 
 /**
  * @brief 用户参数管理

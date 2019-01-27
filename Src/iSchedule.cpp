@@ -374,7 +374,7 @@ bool iShechdule::handleCombo(triggerID_t id)
     comboLastTime = mGetCPUTime() + combo_T;
 
     // check if match any combo sequence
-    const vector<iParam::combo_t>* l = list.param->comboList();
+    const vector<combo_t>* l = list.param->comboList();
     int comboMaxLen = 0;
     for (size_t i = 0; i < l->size(); i++)
     {
