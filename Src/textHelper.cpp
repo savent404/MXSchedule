@@ -1,6 +1,6 @@
 #include "textHelper.h"
 
-bool matchKeyValue(const char* input, std::__cxx11::string& key, int& v)
+bool matchKeyValue(const char* input, std::string& key, int& v)
 {
 
     char nameBuffer[32];
