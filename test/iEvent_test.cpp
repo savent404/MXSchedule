@@ -9,7 +9,7 @@ void defaultEventSender(uint32_t message)
     message_quque.push(message);
 }
 
-bool defaultEventReciver(uint32_t&message, uint32_t timeout = 100)
+bool defaultEventReciver(uint32_t&message, uint32_t timeout)
 {
     if (message_quque.empty())
         return false;
