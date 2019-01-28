@@ -243,39 +243,39 @@ re_t re_compile(const char* pattern)
 
 void re_print(regex_t* pattern)
 {
-    const char* types[] = { "UNUSED", "DOT", "BEGIN", "END", "QUESTIONMARK", "STAR", "PLUS", "CHAR", "CHAR_CLASS", "INV_CHAR_CLASS", "DIGIT", "NOT_DIGIT", "ALPHA", "NOT_ALPHA", "WHITESPACE", "NOT_WHITESPACE", "BRANCH" };
-
-    int i;
-    for (i = 0; i < MAX_REGEXP_OBJECTS; ++i)
-    {
-        if (pattern[i].type == UNUSED)
-        {
-            break;
-        }
-
-        printf("type: %s", types[pattern[i].type]);
-        if (pattern[i].type == CHAR_CLASS || pattern[i].type == INV_CHAR_CLASS)
-        {
-            printf(" [");
-            int j;
-            char c;
-            for (j = 0; j < MAX_CHAR_CLASS_LEN; ++j)
-            {
-                c = pattern[i].ccl[j];
-                if ((c == '\0') || (c == ']'))
-                {
-                    break;
-                }
-                printf("%c", c);
-            }
-            printf("]");
-        }
-        else if (pattern[i].type == CHAR)
-        {
-            printf(" '%c'", pattern[i].ch);
-        }
-        printf("\n");
-    }
+//    const char* types[] = { "UNUSED", "DOT", "BEGIN", "END", "QUESTIONMARK", "STAR", "PLUS", "CHAR", "CHAR_CLASS", "INV_CHAR_CLASS", "DIGIT", "NOT_DIGIT", "ALPHA", "NOT_ALPHA", "WHITESPACE", "NOT_WHITESPACE", "BRANCH" };
+//
+//    int i;
+//    for (i = 0; i < MAX_REGEXP_OBJECTS; ++i)
+//    {
+//        if (pattern[i].type == UNUSED)
+//        {
+//            break;
+//        }
+//
+//        printf("type: %s", types[pattern[i].type]);
+//        if (pattern[i].type == CHAR_CLASS || pattern[i].type == INV_CHAR_CLASS)
+//        {
+//            printf(" [");
+//            int j;
+//            char c;
+//            for (j = 0; j < MAX_CHAR_CLASS_LEN; ++j)
+//            {
+//                c = pattern[i].ccl[j];
+//                if ((c == '\0') || (c == ']'))
+//                {
+//                    break;
+//                }
+//                printf("%c", c);
+//            }
+//            printf("]");
+//        }
+//        else if (pattern[i].type == CHAR)
+//        {
+//            printf(" '%c'", pattern[i].ch);
+//        }
+//        printf("\n");
+//    }
 }
 
 

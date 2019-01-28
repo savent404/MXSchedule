@@ -95,11 +95,6 @@ TEST(regex, match1)
         int m = reMatch(pattern, test);
         isFail = m == -1;
 
-        assert(should_fail == isFail);
         ASSERT_EQ(should_fail == isFail, true);
-        if (should_fail != m)
-        {
-            printf("%s match %s error\r\n", pattern, test);
-        }
     }
 }
