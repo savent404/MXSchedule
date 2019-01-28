@@ -50,7 +50,6 @@ TEST(iEventTest, checkModuleID)
 TEST(iEventTest, checkSignals)
 {
     iEvent event_key(EVENT_MODULE_ID_KEY);
-    event_key
     for (int i = 0; i < 16; i++) {
         uint16_t event = (1 << i);
 
