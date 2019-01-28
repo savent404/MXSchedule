@@ -62,10 +62,10 @@ bool readWavFormat(wavFormat_t& format, const void* ptr)
 {
     /** run id check */
     const char* pChunkID = static_cast<const char*>(ptr);
-    const char* pSubChunk1ID = static_cast<const char*>(ptr + 12);
-    const char* pSubChunk2ID = static_cast<const char*>(ptr + 36);
-    const char* pFormat = static_cast<const char*>(ptr + 8);
-    const uint16_t* pAudioFormat = static_cast<const uint16_t*>(ptr + 20);
+    const char* pSubChunk1ID = static_cast<const char*>(ptr) + 12;
+    const char* pSubChunk2ID = static_cast<const char*>(ptr) + 36;
+    const char* pFormat = static_cast<const char*>(ptr) + 8;
+    const uint16_t* pAudioFormat = static_cast<const uint16_t*>(ptr) + 10;
 
     if (strncmp(pChunkID, "RIFF", 4))
         return false;
@@ -79,10 +79,10 @@ bool readWavFormat(wavFormat_t& format, const void* ptr)
         return false;
 
     /** Get information */
-    const uint16_t *pNumChannels = static_cast<const uint16_t*>(ptr + 22);
-    const uint32_t *pSampleRate = static_cast<const uint32_t*>(ptr + 24);
-    const uint16_t *pBitsPerSample = static_cast<const uint16_t*>(ptr + 34);
-    const uint32_t *pSize = static_cast<const uint32_t*>(ptr + 40);
+    const uint16_t *pNumChannels = static_cast<const uint16_t*>(ptr) + 11;
+    const uint32_t *pSampleRate = static_cast<const uint32_t*>(ptr) + 6;
+    const uint16_t *pBitsPerSample = static_cast<const uint16_t*>(ptr) + 17;
+    const uint32_t *pSize = static_cast<const uint32_t*>(ptr) + 10;
 
     format.channels = *pNumChannels;
     format.frequence = *pSampleRate;
