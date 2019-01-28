@@ -30,8 +30,7 @@ bool convertWavFormat(
 
     size_t mainCnt = samplesInputNum > samplesOutputNum ?
         samplesInputNum : samplesOutputNum;
-    bool isExpand = samplesInputNum > samplesOutputNum ?
-        false : true;
+    bool isExpand = samplesInputNum <= samplesOutputNum;
 
     /** When in this loop, samplesInputNum may not equal samplesOutputNum */
     for (size_t cnt = 1; cnt <= mainCnt; cnt++)
@@ -43,10 +42,10 @@ bool convertWavFormat(
             /** This code considered little edition */
             memcpy(_o + formatedOutputSampleSize * ch,
                    _i + formatedInputSampleSize * (ch + 1) - formatedOutputSampleSize,
-                   formatedOutputSampleSize);
+                   static_cast<size_t>(formatedOutputSampleSize));
         }
         /** Shift ptr contains frequence convert function */
-        if (isExpand == false) {
+        if (!isExpand) {
             _i += formatedInputSampleSize;
             _o = _ro + formatedOutputSampleSize * (cnt * Oformat.frequence / Iformat.frequence);
         } else {
