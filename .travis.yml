@@ -1,11 +1,11 @@
-language:cpp
-
-compiler:
-  - gcc
-
-before_script:
+dist: trusty
+sudo: false
+language: cpp
+  
+script:
   - mkdir build
   - cd build
   - cmake .. -DTEST=ON
-
-script: make && ./MXCoreTest
+  - cmake --build ..
+  - make
+  - ./MXCoreTest
