@@ -42,8 +42,8 @@ TEST(iEventTest, checkModuleID)
     {
         uint16_t except_id = 1 << i;
         uint32_t res;
-        ASSERT_EQ(true, defaultEventReciver(message));
-        ASSERT_EQ(except_id, iEvent::getModuleID(message));
+        ASSERT_EQ(true, defaultEventReciver(res));
+        ASSERT_EQ(except_id, iEvent::getModuleID(res));
     }
 }
 
