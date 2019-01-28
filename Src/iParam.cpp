@@ -1,7 +1,39 @@
 #include "iParam.h"
 
 using namespace std;
+bool iParam::initCallback()
+{
+    numBank = searchFileCnt(workPath.c_str(), "BANK*");
+    // insert every single parameter
+    int val = 0;
+    for (size_t i = 0; i < sizeof(typeIntParam) / sizeof(string); i++)
+    {
+        intParam.insert(typeIntParam[i].c_str(), &val);
+    }
+    floatParam.resize(sizeof(typeFloatParam) / sizeof(string));
 
+    // staticParameter
+    if (readStaticParameter() && (static_cast<size_t>(getBankNum()) == staticParam.configRGBIndex.size()))
+    {
+        posBank = staticParam.posBank;
+    } else {
+        initStaticParameter();
+    }
+
+    // init defualt setting
+    if (!readConfigFromFile((workPath + "SETTING.txt").c_str())) {
+        mDebug(DEBUG_LEVEL_ERROR, "Open SETTING.txt error");
+        return false;
+    }
+    // init ColorConfig
+    if (!readColorConfigFromFile((workPath + "COLORMATRIX.txt").c_str())) {
+        mDebug(DEBUG_LEVEL_ERROR, "Open COLORMATRIX.txt error");
+        return false;
+    }
+    switchBank(posBank);
+    inited = true;
+    return true;
+}
 void iParam::setParameterFromLine(const char* line)
 {
     /** Use static var can save constructor/des-xx time
@@ -18,7 +50,7 @@ void iParam::setParameterFromLine(const char* line)
 
     ripWords(line, buffer);
     if (matchComboN(buffer, comboIndex, comboSequence, comboPriorty)) {
-        int len = strlen(comboSequence);
+        int len = static_cast<int>(strlen(comboSequence));
         bool isRight = true;
         combo_t newCombo(len, comboPriorty, comboIndex);
         for (int i = 0; i < len; i++)
@@ -39,15 +71,13 @@ void iParam::setParameterFromLine(const char* line)
             comboParam.push_back(newCombo);
         }
     } else if (matchKeyValue(buffer, key, aInt)) {
-        bool isTypeInt = setParameter(key.c_str(), aInt);
-        if (isTypeInt == false) {
-            float realFloat = aInt;
-            setParameter(key.c_str(), realFloat);
+        if (!setParameter(key.c_str(), aInt)) {
+            if (!setBankColorIndex(key.c_str(), aInt)) {
+                setParameter(key.c_str(), static_cast<float>(aInt));
+            }
         }
     } else if (matchKeyValue(buffer, key, aRGB)) {
         setParameter(key.c_str(), aRGB);
-    } else if (matchKeyValue(buffer, key, aFloat)) {
-        setParameter(key.c_str(), aFloat);
     }
 }
 
@@ -76,21 +106,12 @@ void iParam::setColorParameterFromLine(const char* line)
 
 void iParam::setDefaultParameter()
 {
+
 }
 
 bool iParam::getParameter(const char* name, int& v) const
 {
-    int pos = getArrayIndex(&typeIntParam[0], name, sizeof(typeIntParam) / sizeof(string));
-    if (pos < 0) {
-        int bankID;
-        if (!matchBankn(name, bankID) || bankID > getBankNum()) {
-            return false;
-        }
-        v = staticParam.configRGBIndex[bankID - 1];
-        return true;
-    }
-    v = intParam.at(pos);
-    return true;
+    return intParam.getData(name, &v);
 }
 
 bool iParam::getParameter(const char* name, float& v) const
@@ -123,37 +144,25 @@ bool iParam::getParameter(const char* name, RGB& v) const
 
 bool iParam::setParameter(const char* name, const int& v)
 {
-    int pos = getArrayIndex(typeIntParam, name, sizeof(typeIntParam) / sizeof(string));
-
-    if (pos < 0) {
-        int bankID;
-        if (!matchBankn(name, bankID) || bankID > getBankNum()) {
-            return false;
-        }
-        staticParam.configRGBIndex.at(bankID - 1) = v - 1;
-        return true;
-    }
-    intParam.at(pos) = v;
-    return true;
+    return intParam.setData(name, &v);
 }
 
 bool iParam::setParameter(const char* name, const float& v)
 {
     int pos = getArrayIndex(typeFloatParam, name, sizeof(typeFloatParam) / sizeof(string));
-
     if (pos < 0)
         return false;
-    floatParam.at(pos) = v;
+    floatParam.at(static_cast<size_t>(pos)) = v;
     return true;
 }
 
 bool iParam::setParameter(const char* name, const RGB& v)
 {
-    size_t configNum = sizeof(typeRGBParam) / sizeof(string);
-    int pos = getArrayIndex(typeRGBParam, name, configNum);
-    if (pos < 0)
+    int configNum = static_cast<int>(sizeof(typeRGBParam) / sizeof(string));
+    if (getArrayIndex(typeRGBParam, name, configNum) < 0)
         return false;
-    int configIndex = staticParam.configRGBIndex.at((getBankPos() + colorPosBank) % getBankNum());
+    auto pos = static_cast<size_t>((getBankPos() + colorPosBank) % getBankNum());
+    int configIndex = staticParam.configRGBIndex.at(pos);
     if (size_t(configIndex) >= staticParam.configRGB.size()) {
         return false;
     }
@@ -178,8 +187,7 @@ bool iParam::switchBank(int pos)
         v = "";
     }
 
-    v = workPath + v + "/";
-    bankName = v;
+    bankName = workPath + v + "/";
     posBank = pos;
     staticParam.posBank = getBankPos();
 
@@ -197,50 +205,9 @@ bool iParam::switchBank(int pos)
         return false;
     }
 
-    v = getBankName();
-    v += "Effect.txt";
+    v = getBankName() + "Effect.txt";
     readConfigFromFile(v.c_str());
 
     return true;
 }
 
-bool iParam::incColorPos()
-{
-    colorPosBank++;
-    return true;
-}
-
-bool iParam::resetColorPos()
-{
-    colorPosBank = 0;
-    return true;
-}
-int iParam::getBankNum() const
-{
-    return numBank;
-}
-
-int iParam::getBankPos() const
-{
-    return posBank;
-}
-
-string iParam::getBankName() const
-{
-    return bankName;
-}
-
-int iParam::getTriggerNum(triggerID_t id) const
-{
-    return triggerNum[id];
-}
-
-const vector<iParam::combo_t> *iParam::comboList() const
-{
-    return &comboParam;
-}
-
-string iParam::getPrefixPath() const
-{
-    return workPath;
-}
