@@ -9,6 +9,7 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include "hash.h"
 #include "combo.h"
 
 /**
@@ -21,51 +22,6 @@ public:
     typedef enum {
         crash = 0x01,
     } event_t;
-
-    /**
-     * @brief The combo_t struct
-     * @details storage Combo's msg: priority, id and sequence
-     */
-    struct combo_t {
-        int id;
-        int priority;
-        int len;
-        uint8_t* sequence;
-
-        combo_t(int length, int pri = 1, int playId = 1)
-        {
-            if (length <= 0)
-                sequence = NULL;
-            else {
-                sequence = (uint8_t*)malloc(sizeof(uint8_t)*length);
-                memset(sequence, 0, length * sizeof(uint8_t));
-            }
-            len = length;
-            id = playId;
-            priority = pri;
-        }
-
-        combo_t(const combo_t& other)
-        {
-            if (other.len <= 0)
-                sequence = NULL;
-            else {
-                sequence = (uint8_t*)malloc(sizeof(uint8_t)*other.len);
-                memcpy(sequence, other.sequence, sizeof(uint8_t)*other.len);
-            }
-            len = other.len;
-            id = other.id;
-            priority = other.priority;
-        }
-
-        ~combo_t()
-        {
-            if (sequence)
-            {
-                free(sequence);
-            }
-        }
-    };
 
 protected:
     /** @name bank related parameter
@@ -84,7 +40,7 @@ protected:
     /** 
      * @name parameter list, classify by type 
      * @{ */
-    std::vector<int> intParam;
+    Hash intParam;
     std::vector<float> floatParam;
     std::vector<combo_t> comboParam;
     /** @} */
@@ -118,8 +74,16 @@ public:
     virtual bool readColorConfigFromFile(const char* filepath) = 0;
     virtual bool readStaticParameter() = 0;
     virtual bool writeStaticParameter() = 0;
-protected:
+    virtual void initStaticParameter() {
+        size_t rgbNum = sizeof(typeRGBParam) / sizeof(string);
+        staticParam.configRGBIndex.reserve(getBankNum());
+        staticParam.configRGB.reserve(getBankNum() * rgbNum);
+        staticParam.configRGBIndex.resize(getBankNum());
+        // posBank = posBank;
+    }
     /** @} */
+protected:
+
     /**
      * @name text operation
      * @{ */
@@ -139,6 +103,17 @@ protected:
      */
     void setDefaultParameter();
 
+    inline bool setBankColorIndex(const char* name, const int& v)
+    {
+        int bank;
+        if (!matchBankn(name, bank) || bank > getBankNum() || bank < 1)
+            return false;
+        staticParam.configRGBIndex[bank - 1] = v;
+        return true;
+    }
+
+    bool initCallback();
+
 public:
     /**
      * @brief 标记初始化是否完成
@@ -151,10 +126,12 @@ public:
         , colorPosBank(0)
         , numBank(0)
         , inited(false)
+        , intParam(64, sizeof(int))
     {
         setEventMask(crash);
-        // readStaticParameter();
-        // switchBank(bank);
+        // In sub-class, u should init attribute: 'workPath'
+        // After constructure, call 'initCallback'
+        // at the end and check the return val
     }
 
     virtual ~iParam()
