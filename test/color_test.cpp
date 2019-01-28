@@ -9,7 +9,7 @@ static void isEqual(const RGB& a, const RGB& b)
     ASSERT_EQ(a.G, b.G);
     ASSERT_EQ(a.B, b.B);
 }
-static void isEqual(const RGB& a, const uint8_t& colors[3])
+static void isEqual(const RGB& a, const uint8_t colors[3])
 {
     ASSERT_EQ(a.R, colors[0]);
     ASSERT_EQ(a.G, colors[1]);
@@ -91,7 +91,7 @@ TEST(ColorTest, CheckFunction)
             c[j] += rand() % 20 - 10;
         }
         RGB c2(c[0], c[1], c[2]);
-        ASSERT_EQ(c1.similar(c2));
+        ASSERT_EQ(true, c1.similar(c2));
     }
 }
 
