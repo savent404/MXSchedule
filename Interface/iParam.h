@@ -196,48 +196,48 @@ public:
     /**
      * @brief colorSwitch更新颜色参数的index
      */
-    bool incColorPos();
+    bool incColorPos() { colorPosBank++; return true; }
 
     /**
      * @brief 清除ColorSwitch造成的bank颜色不符
      */
-    bool resetColorPos();
+    bool resetColorPos() { colorPosBank = 0; return true; }
 
     /**
      * @brief getBankNum
      * @return bank's number
      */
-    int getBankNum() const;
+    int getBankNum() const { return numBank; }
 
     /**
      * @brief getBankPos
      * @return bank's position
      */
-    int getBankPos() const;
+    int getBankPos() const { return posBank; }
 
     /**
      * @brief getBankName
      * @return bank's name
      */
-    std::string getBankName() const;
+    std::string getBankName() const { return bankName; }
 
     /**
      * @brief get Bank's prefix path
      * @return string
      */
-    std::string getPrefixPath() const;
+    std::string getPrefixPath() const { return workPath; }
 
     /**
      * @brief getTriggerNum
      * @param id
      * @return number
      */
-    int getTriggerNum(triggerID_t id) const;
+    int getTriggerNum(triggerID_t id) const { return triggerNum[id]; }
 
     /**
      * @brief comboList
      * @return combo's array
      * @note It's a const method, and return const array
      */
-    const vector<combo_t> *comboList() const;
+    const vector<combo_t> *comboList() const { return &comboParam; }
 };

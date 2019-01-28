@@ -197,50 +197,9 @@ bool iParam::switchBank(int pos)
         return false;
     }
 
-    v = getBankName();
-    v += "Effect.txt";
+    v = getBankName() + "Effect.txt";
     readConfigFromFile(v.c_str());
 
     return true;
 }
 
-bool iParam::incColorPos()
-{
-    colorPosBank++;
-    return true;
-}
-
-bool iParam::resetColorPos()
-{
-    colorPosBank = 0;
-    return true;
-}
-int iParam::getBankNum() const
-{
-    return numBank;
-}
-
-int iParam::getBankPos() const
-{
-    return posBank;
-}
-
-string iParam::getBankName() const
-{
-    return bankName;
-}
-
-int iParam::getTriggerNum(triggerID_t id) const
-{
-    return triggerNum[id];
-}
-
-const vector<combo_t> *iParam::comboList() const
-{
-    return &comboParam;
-}
-
-string iParam::getPrefixPath() const
-{
-    return workPath;
-}
