@@ -148,9 +148,10 @@ public:
         if (abs(sub) >= offset)
             return false;
         sub = wB() - other.wB();
-        if (abs(sub) >= offset)
-            return false;
-        return true;
+//        if (abs(sub) >= offset)
+//            return false;
+//        return true;
+        return abs(sub) < offset;
     }
 
     /**

@@ -8,7 +8,7 @@
     ASSERT_EQ(a.G, b.G);\
     ASSERT_EQ(a.B, b.B);\
 }
-#define isEqual_2(a, colors[3]) {\
+#define isEqual_2(a, colors) {\
     ASSERT_EQ(a.R, colors[0]);\
     ASSERT_EQ(a.G, colors[1]);\
     ASSERT_EQ(a.B, colors[2]);\
@@ -42,13 +42,14 @@ TEST(ColorTest, CheckOperator)
             c[j] = rand() % 128 + 128;
         }
         RGB c1(c[0], c[1], c[2]);
+        isEqual_2(c1, c);
 
         // operator '-='
         for (int j = 0; j < 3; j++)
         {
             c[j] -= 20;
         }
-        c1 -= 20;
+        c1 -= RGB(20, 20, 20);
         isEqual_2(c1, c);
 
         // operator '+='
@@ -56,7 +57,7 @@ TEST(ColorTest, CheckOperator)
         {
             c[j] += 20;
         }
-        c1 += 20;
+        c1 += RGB(20, 20, 20);
         isEqual_2(c1, c);
 
         // operator '*='
@@ -81,15 +82,16 @@ TEST(ColorTest, CheckFunction)
         // similar
         for (int j = 0; j < 3; j++)
         {
-            c[j] = rand() % 256;
+            c[j] = rand() % 128 + 50;
         }
         RGB c1(c[0], c[1], c[2]);
         for (int j = 0; j < 3; j++)
         {
-            c[j] += rand() % 20 - 10;
+            c[j] += (rand() % 19) - 9;
         }
         RGB c2(c[0], c[1], c[2]);
-        ASSERT_EQ(true, c1.similar(c2));
+        ASSERT_EQ(true, c1.similar(c2, 10));
+
     }
 }
 
@@ -98,7 +100,7 @@ TEST(ColorTest, CheckColorConvert)
     HSV hsv_red(0, 1.0, 1.0);
     RGB rgb_red(255, 0, 0);
 
-    HSV hsv_green(128, 1.0, 1.0);
+    HSV hsv_green(120, 1.0, 1.0);
     RGB rgb_green(0, 255, 0);
 
     HSV hsv_blue(240, 1.0, 1.0);
