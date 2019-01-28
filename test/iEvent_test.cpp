@@ -36,7 +36,7 @@ TEST(iEventTest, checkModuleID)
     {
         uint16_t moduleID = 1 << i;
         iEvent event(moduleID);
-        event.sendEvent(0);
+        event.sendEvent(0, defaultEventSender);
     }
     for (int i = 0; i < 16; i++)
     {
