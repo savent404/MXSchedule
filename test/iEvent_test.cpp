@@ -1,5 +1,5 @@
 #include "iEvent.hpp"
-
+#include "gtest/gtest.h"
 #include <queue>
 
 static std::queue<uint32_t> message_quque;
