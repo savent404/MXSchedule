@@ -6,6 +6,5 @@ script:
   - mkdir build
   - cd build
   - cmake .. -DTEST=ON
-  - cmake --build ..
   - make
   - ./MXCoreTest
