@@ -3,17 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static void isEqual(const RGB& a, const RGB& b)
-{
-    ASSERT_EQ(a.R, b.R);
-    ASSERT_EQ(a.G, b.G);
-    ASSERT_EQ(a.B, b.B);
+#define isEqual_1(a, b) { \
+    ASSERT_EQ(a.R, b.R);\
+    ASSERT_EQ(a.G, b.G);\
+    ASSERT_EQ(a.B, b.B);\
 }
-static void isEqual(const RGB& a, const uint8_t colors[3])
-{
-    ASSERT_EQ(a.R, colors[0]);
-    ASSERT_EQ(a.G, colors[1]);
-    ASSERT_EQ(a.B, colors[2]);
+#define isEqual_2(a, colors[3]) {\
+    ASSERT_EQ(a.R, colors[0]);\
+    ASSERT_EQ(a.G, colors[1]);\
+    ASSERT_EQ(a.B, colors[2]);\
 }
 
 TEST(ColorTest, CheckCpy)
@@ -28,9 +26,9 @@ TEST(ColorTest, CheckCpy)
         RGB c1(c[0], c[1], c[2]);
         RGB c2(c1);
         RGB c3 = c1;
-        isEqual(c1, c);
-        isEqual(c1, c2);
-        isEqual(c1, c3);
+        isEqual_2(c1, c);
+        isEqual_1(c1, c2);
+        isEqual_1(c1, c3);
     }
 }
 
@@ -51,7 +49,7 @@ TEST(ColorTest, CheckOperator)
             c[j] -= 20;
         }
         c1 -= 20;
-        isEqual(c1, c);
+        isEqual_2(c1, c);
 
         // operator '+='
         for (int j = 0; j < 3; j++)
@@ -59,7 +57,7 @@ TEST(ColorTest, CheckOperator)
             c[j] += 20;
         }
         c1 += 20;
-        isEqual(c1, c);
+        isEqual_2(c1, c);
 
         // operator '*='
         for (int j = 0; j < 3; j++)
@@ -67,7 +65,7 @@ TEST(ColorTest, CheckOperator)
             c[j] *= 0.3;
         }
         c1 *= 0.3;
-        isEqual(c1, c);
+        isEqual_2(c1, c);
 
         // operator '=='
         RGB c2 = c1;
