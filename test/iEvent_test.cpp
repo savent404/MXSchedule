@@ -7,7 +7,6 @@ static std::queue<uint32_t> message_quque;
 void defaultEventSender(uint32_t message)
 {
     message_quque.push(message);
-    return true;
 }
 
 bool defaultEventReciver(uint32_t&message, uint32_t timeout = 100)
