@@ -5,7 +5,7 @@ bool matchKeyValue(const char* input, std::string& key, int& v)
 
     char nameBuffer[32];
     int vv;
-    if (re_match("\\w+=-?\\d+[^,.]*$", input) == -1)
+    if (reMatch("\\w+=-?\\d+[^,.]*$", input) == -1)
         return false;
     sscanf(input, "%[^=]S", &nameBuffer[0]);
     sscanf(input, "%*[^=]=%d", &vv);
@@ -45,7 +45,7 @@ bool matchBankn(const char* input, int& bankIndex)
 {
     if (strncasecmp(input, "BANK", 4))
         return false;
-    if (re_match("\\w+\\d+", input) == -1)
+    if (reMatch("\\w+\\d+", input) == -1)
         return false;
     sscanf(input, "BANK%d", &bankIndex);
     return true;
@@ -55,7 +55,7 @@ bool matchComboN(const char *input, int &comboIndex, char *sequence, int &priori
 {
     if (strncasecmp(input, "combo", 5))
         return false;
-    if (re_match("^\\d+=\\w+-\\d+", input + 5) == -1)
+    if (reMatch("^\\d+=\\w+-\\d+", input + 5) == -1)
         return false;
     sscanf(input + 5, "%d=%[^-]s", &comboIndex, sequence);
     while (*input != '-')
@@ -66,7 +66,7 @@ bool matchComboN(const char *input, int &comboIndex, char *sequence, int &priori
 
 bool matchCFGn(const char* input, int& configIndex)
 {
-    if (re_match("CFG\\d+:", input) == -1)
+    if (reMatch("CFG\\d+:", input) == -1)
         return false;
     sscanf(input, "CFG%d", &configIndex);
     return true;
@@ -77,7 +77,7 @@ bool matchKeyValue(const char* input, string& key, float& v)
 
     char nameBuffer[32];
     float vv;
-    if (re_match("\\w+=-?\\d+.\\d+[^,]*$", input) == -1)
+    if (reMatch("\\w+=-?\\d+.\\d+[^,]*$", input) == -1)
         return false;
     sscanf(input, "%[^=]s", nameBuffer);
     sscanf(input, "%*[^=]=%f", &vv);
@@ -91,7 +91,7 @@ bool matchKeyValue(const char* input, string& key, RGB& v)
     char nameBuffer[32];
     int vBuffer[4];
 
-    if (re_match("\\w+=\\d+,\\d+,\\d+,\\d+", input) == -1) {
+    if (reMatch("\\w+=\\d+,\\d+,\\d+,\\d+", input) == -1) {
         return false;
     }
 
