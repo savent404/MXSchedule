@@ -1,6 +1,7 @@
 # MXSchedule
 [![Build Status](https://travis-ci.com/savent404/MXSchedule.svg?branch=master)](https://travis-ci.com/savent404/MXSchedule)
-This is a schedule for MX Light saber
+-------------------------------------------------------------------------------
+This is schedule for MX3
 
 ## Generate Doxygen Doucument
 ``` shell
