@@ -62,9 +62,9 @@ public:
 
 protected:
     int findPosition(const char* key) const;
-    __always_inline static void allocElement(element_t* element, const char* name, const void* data, size_t size);
-    __always_inline static void freeElement(element_t* element);
-    __always_inline static unsigned H1(const char* key);
-    __always_inline static unsigned H2(const char* key, unsigned i);
+    static void allocElement(element_t* element, const char* name, const void* data, size_t size);
+    static void freeElement(element_t* element);
+    static unsigned H1(const char* key);
+    static unsigned H2(const char* key, unsigned i);
 };
 #endif //MXCORE_HASH_H

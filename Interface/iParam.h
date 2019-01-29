@@ -216,5 +216,5 @@ public:
      * @return combo's array
      * @note It's a const method, and return const array
      */
-    const vector<combo_t> *comboList() const { return &comboParam; }
+    const std::vector<combo_t> *comboList() const { return &comboParam; }
 };
