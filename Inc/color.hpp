@@ -1,7 +1,9 @@
 #pragma once
 
-#include <math.h>
+#include <cmath>
 #include <stdint.h>
+
+using namespace std;
 
 /**
  * @brief RGB 颜色空间
