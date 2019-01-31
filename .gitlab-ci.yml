@@ -1,7 +1,15 @@
 build:
-    script:
-        -   mkdir build
-        -   cd build
-        -   cmake .. -DTEST=on
-        -   make
-        -   ./MXCoreTest
+  script:
+    -   mkdir build
+    -   cd build
+    -   cmake .. -DTEST=on
+    -   make
+    -   ./MXCoreTest
+        
+pages:
+  script:
+  - doxygen Doxyfile
+  - mv Doc/html/ public/
+  artifacts:
+    paths:
+    - public
